@@ -6,17 +6,14 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.gridfs.GridFSBucket;
-import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.model.IndexOptions;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -125,7 +122,7 @@ public class MongoRepo {
                     .append("mail", email)
                     .append("hashedPassword", hashedPassword)
                     .append("LoginToken", tokenData)
-                    .append("image_ids", new ArrayList<>());
+                    .append("image_ids", new ArrayList<ObjectId>());
 
             // Insert into collection
             users.insertOne(userDoc);
