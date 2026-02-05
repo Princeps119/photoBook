@@ -4,11 +4,10 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: snakebackendcontainer
+    container_name: photobookcontainer
     ports:
-      - "8080:8080"
+      - "8080:8080"       # api endpoint
       - "5005:5005"       # <— expose debug port to host
-      - "3000:3000"       # <— expose port to serve html separate from the Server API Anfragen
 
     depends_on:
       mongoDB:
