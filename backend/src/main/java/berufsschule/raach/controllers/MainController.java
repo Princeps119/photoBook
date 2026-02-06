@@ -19,6 +19,7 @@ public class MainController {
 
 
     public static final String CONTENT_TYPE_JSON = "application/json";
+    public static final String CONTENT_TYPE_IMAGE = "image/png";
     public static final String CONTENT_TYPE = "Content-Type";
 
     public static Optional<Boolean> processRequest(final HttpExchange exchange) {

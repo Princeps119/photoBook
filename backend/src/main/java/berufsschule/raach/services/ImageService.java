@@ -60,7 +60,7 @@ public class ImageService {
         GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
         // Convert bytes to InputStream
-        try (InputStream is = new java.io.ByteArrayInputStream(uploadData.byteArray())) {
+        try (InputStream is = new java.io.ByteArrayInputStream(uploadData.image().byteArray())) {
             ObjectId id = BUCKET.uploadFromStream(uploadData.filename(), is, options);
 
             USER_DB.getCollection("users").updateOne(

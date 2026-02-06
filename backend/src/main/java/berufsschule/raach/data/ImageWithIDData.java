@@ -13,7 +13,7 @@ import org.bson.Document;
  * Mock JSON
  *<p>
         {<p>
-                "hexString": "507f1f77bcf86cd799439011",<p> -optional is created by MongoDB-
+                "hexString": "507f1f77bcf86cd799439011",<p>
                 "filename": "profile_picture.png",<p>
                 "metadata": {<p>
                         "userMail": "alice@example.com", -optional-
@@ -21,7 +21,9 @@ import org.bson.Document;
                         "tag": "Public",
                         "uploadDate": "2026-02-05T17:40:00Z" -optional-
                         },<p>
-                "byteArray": "iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                        "image": {
+                                "byteArray":"iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                        }
         }
  </p>
 

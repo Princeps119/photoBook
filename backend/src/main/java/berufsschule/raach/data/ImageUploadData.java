@@ -7,7 +7,7 @@ import org.bson.Document;
  *
  * @param filename name of the image
  * @param metadata must contain a tag key with either Private or Public value
- * @param byteArray the image itself
+ * @param image the image itself
  *<p>
  * Mock JSON
  *<p>
@@ -19,10 +19,12 @@ import org.bson.Document;
                         "tag": "Public", -required-
                         "uploadDate": "2026-02-05T17:40:00Z" -optional-
                         },<p>
-                "byteArray": "iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                "image": {
+                              "byteArray":"iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                }
         }
  </p>
 
  */
-public record ImageUploadData(String filename, @NonNull Document metadata, @NonNull byte[] byteArray) {}
+public record ImageUploadData(String filename, @NonNull Document metadata, ImageArrayData image) {}
 
