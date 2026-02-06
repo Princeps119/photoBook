@@ -16,7 +16,6 @@ public class Main {
     public static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static final int PORT = 8080;
-    public static final int HTML_PORT = 3000;
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
