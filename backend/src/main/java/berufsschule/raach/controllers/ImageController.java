@@ -47,7 +47,7 @@ public class ImageController {
     }
 
     private static boolean checkImageMapping(String path, String method, HttpExchange exchange) {
-        final String checkedPath = checkPath(path, exchange);
+        final String checkedPath = checkPathImage(path, exchange);
 
         if (mapping.contains(checkedPath)) {
             logger.log(Level.INFO, "Mapping found for {0}", path);

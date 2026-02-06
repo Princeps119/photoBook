@@ -181,6 +181,21 @@ public class Util {
         return gson.fromJson(reader, clazz);
     }
 
+    public static String checkPathImage(final String path, final HttpExchange exchange) {
+
+        long slashCount = path.chars().filter(ch -> ch == '/').count();
+
+        if (slashCount == 3 && path.contains("image")) {
+            return path;
+        } else {
+            logger.log(Level.SEVERE, "Issue pathing", path);
+            sendErrorResponse(exchange, 400, "Invalid JSON format");
+        }
+        logger.log(Level.SEVERE, "Issue pathing", path);
+        sendErrorResponse(exchange, 400, "Invalid JSON format");
+        return null;
+    }
+
     public static String checkPath(final String path, final HttpExchange exchange) {
 
         long slashCount = path.chars().filter(ch -> ch == '/').count();
