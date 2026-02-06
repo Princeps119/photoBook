@@ -1,4 +1,4 @@
-package berufsschule.raach.data;
+package berufsschule.raach.data.imageData;
 
 import org.bson.Document;
 

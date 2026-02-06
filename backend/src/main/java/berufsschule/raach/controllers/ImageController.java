@@ -1,9 +1,9 @@
 package berufsschule.raach.controllers;
 
-import berufsschule.raach.data.ImageSummaryData;
-import berufsschule.raach.data.ImageTag;
-import berufsschule.raach.data.ImageUploadData;
-import berufsschule.raach.data.ImageWithIDData;
+import berufsschule.raach.data.imageData.ImageSummaryData;
+import berufsschule.raach.data.imageData.ImageTag;
+import berufsschule.raach.data.imageData.ImageUploadData;
+import berufsschule.raach.data.imageData.ImageWithIDData;
 import berufsschule.raach.exeptions.DbSearchException;
 import berufsschule.raach.exeptions.UserNotFoundException;
 import berufsschule.raach.repo.MongoRepo;
