@@ -62,7 +62,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <!-- Since Main.java is in default package -->
-                            <mainClass>Main</mainClass>
+                            <mainClass>berufsschule.raach.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
