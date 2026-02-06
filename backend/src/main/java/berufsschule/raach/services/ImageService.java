@@ -188,9 +188,8 @@ public class ImageService {
         );
     }
 
-    //needs to be checked before call if Object Id belongs to user
     private GridFSFindIterable getAllImages() {
-        return BUCKET.find();
+        return BUCKET.find().filter(Filters.eq("tag", ImageTag.Public));
     }
 
     private boolean checkUserAuthForImageId(HttpExchange exchange, ObjectId id) {
