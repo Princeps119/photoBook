@@ -13,10 +13,7 @@ import org.bson.types.ObjectId;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,10 +38,9 @@ public class ImageController {
                 new Object[]{method, path});
 
         return Optional.of(checkImageMapping(path, method, exchange));
-
     }
 
-    private static Boolean checkImageMapping(String path, String method, HttpExchange exchange) {
+    private static boolean checkImageMapping(String path, String method, HttpExchange exchange) {
         final String checkedPath = checkPath(path, exchange);
 
         if (mapping.contains(checkedPath)) {
@@ -64,6 +60,39 @@ public class ImageController {
         throw new IllegalArgumentException("Invalid path");
     }
 
+    private static boolean findAllImagesForUser(String method, HttpExchange exchange) {
+        if (!method.equals(GET)) {
+            try {
+                final ImageService imageService = ImageService.getInstance();
+                Optional<List<ImageWithMetaData>> imagesOp = imageService.getAllImagesForUser(exchange);
+                imagesOp.ifPresent(images -> {
+                    try {
+                        logger.log(Level.INFO, "Found {0} images for user", images.size());
+
+                        final Gson gson = new GsonBuilder().create();
+                        final String json = gson.toJson(images);
+                        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+                        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+                        exchange.sendResponseHeaders(200, bytes.length);
+
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(bytes);
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, "Error writing response", e);
+                        sendErrorResponse(exchange, 500, "Internal server error");
+                    }
+                });
+                return true;
+            } catch (DbSearchException e) {
+                sendErrorResponse(exchange, 500, "Image not found");
+            } catch (IllegalArgumentException e) {
+                sendErrorResponse(exchange, 400, "Invalid username or password");
+            }
+        }
+        return false;
+    }
+
     private static Boolean save(String method, HttpExchange exchange) {
         if (exchange.getRequestBody() != null && method.equals(POST) && exchange.getRequestHeaders().get(CONTENT_TYPE).contains(CONTENT_TYPE_JSON)) {
             try {
@@ -71,7 +100,7 @@ public class ImageController {
                 final ImageService imageService = ImageService.getInstance();
                 final ImageWithMetaData imageData = readJSON(exchange, ImageWithMetaData.class);
 
-                if (imageData == null || imageData.byteArray() == null || imageData.filename() == null || imageData.metadata().containsKey("mail")) {
+                if (imageData == null || imageData.filename() == null || imageData.metadata().containsKey("mail")) {
                     sendErrorResponse(exchange, 400, "Invalid payload: filename, byteArray and metadata.mail are required");
                     return false;
                 }
@@ -94,7 +123,6 @@ public class ImageController {
         }
         return false;
     }
-
 
     private static Boolean findImageById(String method, HttpExchange exchange) {
         if (method.equals(GET)) {
@@ -144,12 +172,9 @@ public class ImageController {
                 return didDelete;
             } catch (IOException e) {
                 sendErrorResponse(exchange, 500, "Error deleting user");
-
             }
         }
         return false;
-
     }
-
 
 }

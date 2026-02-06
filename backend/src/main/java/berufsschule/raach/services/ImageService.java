@@ -116,10 +116,14 @@ public class ImageService {
         return getImageWithDataList(listAllImages);
     }
 
-    public Optional<List<ImageWithMetaData>> getAllImagesForUser(List<ObjectId> imageIDs) {
+    public Optional<List<ImageWithMetaData>> getAllImagesForUser(HttpExchange exc) {
+        final List<ObjectId> imageIDs = checkUserAuthAndGetImageIds(exc);
+        if (imageIDs == null || imageIDs.isEmpty()) {
+            return Optional.of(new ArrayList<>());
+        }
 
-        final List<ImageWithMetaData> result = getImageWithDataList(BUCKET.find(Filters.in("_id", imageIDs)));
-        return Optional.of(result);
+        final GridFSFindIterable listAllImages = BUCKET.find(Filters.in("_id", imageIDs));
+        return Optional.of(getImageWithDataList(listAllImages));
     }
 
     private List<ImageWithMetaData> getImageWithDataList(GridFSFindIterable list) {
@@ -183,13 +187,26 @@ public class ImageService {
     }
 
     private boolean checkUserAuthForImageId(HttpExchange exchange, ObjectId id) {
-        final String decryptedMail = checkLoginToken(exchange, userCollection);
-        final Document userDocument = userCollection.find(Filters.eq("mail", decryptedMail)).first();
+        final Document userDocument = getUser(exchange);
 
-        if (userDocument != null && userDocument.containsKey("image_ids")) {
+        if (userDocument != null && userDocument.containsKey("imageIds")) {
             List<ObjectId> idList = userDocument.getList("imageIds", ObjectId.class);
-            return idList.contains(id);
+            return idList != null && idList.contains(id);
         }
         return false;
+    }
+
+    private Document  getUser(HttpExchange exchange) {
+        final String decryptedMail = checkLoginToken(exchange, userCollection);
+        return userCollection.find(Filters.eq("mail", decryptedMail)).first();
+    }
+    
+    private List<ObjectId> checkUserAuthAndGetImageIds(HttpExchange exchange) {
+        final Document userDocument = getUser(exchange);
+
+        if (userDocument != null && userDocument.containsKey("imageIds")) {
+            return userDocument.getList("imageIds", ObjectId.class);
+        }
+        return null;
     }
 }
