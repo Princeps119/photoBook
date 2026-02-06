@@ -13,7 +13,7 @@ import org.bson.Document;
  * Mock JSON
  *<p>
         {<p>
-                "hexString": "507f1f77bcf86cd799439011",<p>
+                "hexString": "507f1f77bcf86cd799439011",<p> -optional is created by MongoDB-
                 "filename": "profile_picture.png",<p>
                 "metadata": {<p>
                         "userMail": "alice@example.com", -optional-
@@ -26,5 +26,5 @@ import org.bson.Document;
  </p>
 
  */
-public record ImageWithMetaData(String hexStringId, String filename, Document metadata, @NonNull byte[] byteArray) {}
+public record ImageWithIDData(String hexStringId, String filename, @NonNull Document metadata, @NonNull byte[] byteArray) {}
 

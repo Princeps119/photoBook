@@ -1,9 +1,12 @@
 package berufsschule.raach.controllers;
 
+import berufsschule.raach.data.ImageSummaryData;
 import berufsschule.raach.data.ImageTag;
-import berufsschule.raach.data.ImageWithMetaData;
+import berufsschule.raach.data.ImageUploadData;
+import berufsschule.raach.data.ImageWithIDData;
 import berufsschule.raach.exeptions.DbSearchException;
 import berufsschule.raach.exeptions.UserNotFoundException;
+import berufsschule.raach.repo.MongoRepo;
 import berufsschule.raach.services.ImageService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,6 +30,9 @@ public class ImageController {
     private static final String API_PREFIX = "/api/image/";
     private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + "save", API_PREFIX + "findid", API_PREFIX + "allforuser",
             API_PREFIX + "delete"));
+
+    private static final String USER_COLLECTION_NAME = "users";
+    private static final MongoRepo userDB = MongoRepo.getInstance();
 
     public static Optional<Boolean> handleImageRequest(final HttpExchange exchange) {
 
@@ -64,7 +70,8 @@ public class ImageController {
         if (!method.equals(GET)) {
             try {
                 final ImageService imageService = ImageService.getInstance();
-                Optional<List<ImageWithMetaData>> imagesOp = imageService.getAllImagesForUser(exchange);
+                Optional<List<ImageSummaryData>> imagesOp = imageService.getAllImageSummariesForUser(exchange);
+
                 imagesOp.ifPresent(images -> {
                     try {
                         logger.log(Level.INFO, "Found {0} images for user", images.size());
@@ -97,15 +104,16 @@ public class ImageController {
         if (exchange.getRequestBody() != null && method.equals(POST) && exchange.getRequestHeaders().get(CONTENT_TYPE).contains(CONTENT_TYPE_JSON)) {
             try {
 
+                final String decryptedMail = checkLoginToken(exchange, userDB.getUserCollection(USER_COLLECTION_NAME));
                 final ImageService imageService = ImageService.getInstance();
-                final ImageWithMetaData imageData = readJSON(exchange, ImageWithMetaData.class);
+                final ImageUploadData imageData = readJSON(exchange, ImageUploadData.class);
 
                 if (imageData == null || imageData.filename() == null || imageData.metadata().containsKey("mail")) {
                     sendErrorResponse(exchange, 400, "Invalid payload: filename, byteArray and metadata.mail are required");
                     return false;
                 }
 
-                final boolean result = imageService.saveImage(imageData);
+                final boolean result = imageService.saveImage(imageData, decryptedMail);
 
                 if (result) {
                     exchange.sendResponseHeaders(200, -1);
@@ -136,7 +144,7 @@ public class ImageController {
                 }
 
                 final ObjectId id = new ObjectId(queryMap.get("id"));
-                final Optional<ImageWithMetaData> foundImageOpt = imageService.findImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
+                final Optional<ImageWithIDData> foundImageOpt = imageService.findImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
 
                 if (foundImageOpt.isPresent()) {
                     final Gson gson = new GsonBuilder().create();

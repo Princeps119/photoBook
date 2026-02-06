@@ -1,7 +1,9 @@
 package berufsschule.raach.services;
 
+import berufsschule.raach.data.ImageSummaryData;
 import berufsschule.raach.data.ImageTag;
-import berufsschule.raach.data.ImageWithMetaData;
+import berufsschule.raach.data.ImageUploadData;
+import berufsschule.raach.data.ImageWithIDData;
 import berufsschule.raach.exeptions.DBSaveException;
 import berufsschule.raach.exeptions.DbSearchException;
 import berufsschule.raach.repo.MongoRepo;
@@ -53,30 +55,29 @@ public class ImageService {
         return instance;
     }
 
-    public boolean saveImage(ImageWithMetaData imageWithMetaData) {
+    public boolean saveImage(ImageUploadData uploadData, final String decryptedMail) {
 
-        GridFSUploadOptions options = new GridFSUploadOptions().metadata(imageWithMetaData.metadata());
+        GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
         // Convert bytes to InputStream
-        try (InputStream is = new java.io.ByteArrayInputStream(imageWithMetaData.byteArray())) {
-            ObjectId id = BUCKET.uploadFromStream(imageWithMetaData.filename(), is, options);
-
+        try (InputStream is = new java.io.ByteArrayInputStream(uploadData.byteArray())) {
+            ObjectId id = BUCKET.uploadFromStream(uploadData.filename(), is, options);
 
             USER_DB.getCollection("users").updateOne(
-                    Filters.eq("mail", imageWithMetaData.metadata().get("mail")),
+                    Filters.eq("mail", decryptedMail),
                     Updates.push("imageIds", id)
             );
 
             return true;
 
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Error while saving image " + imageWithMetaData.filename(), e);
-            throw new DBSaveException("Error while saving image " + imageWithMetaData.filename(), e);
+            logger.log(Level.WARNING, "Error while saving image " + uploadData.filename(), e);
+            throw new DBSaveException("Error while saving image " + uploadData.filename(), e);
         }
     }
 
     //needs to be checked before call if Object Id belongs to user
-    public Optional<ImageWithMetaData> findImageWithIdAndTag(ObjectId id, ImageTag tag) throws DbSearchException {
+    public Optional<ImageWithIDData> findImageWithIdAndTag(ObjectId id, ImageTag tag) throws DbSearchException {
 
         final Optional<GridFSFile> imageFileOpt = getImageWithIdAndTag(id, tag);
         if (imageFileOpt.isPresent()) {
@@ -110,30 +111,36 @@ public class ImageService {
         return false;
     }
 
-    public List<ImageWithMetaData> findAllImages() {
+    public List<ImageWithIDData> findAllImages() {
         GridFSFindIterable listAllImages = getAllImages();
 
         return getImageWithDataList(listAllImages);
     }
 
-    public Optional<List<ImageWithMetaData>> getAllImagesForUser(HttpExchange exc) {
+    public Optional<List<ImageSummaryData>> getAllImageSummariesForUser(HttpExchange exc) {
         final List<ObjectId> imageIDs = checkUserAuthAndGetImageIds(exc);
-        if (imageIDs == null || imageIDs.isEmpty()) {
-            return Optional.of(new ArrayList<>());
-        }
+        if (imageIDs == null || imageIDs.isEmpty()) return Optional.empty();
 
-        final GridFSFindIterable listAllImages = BUCKET.find(Filters.in("_id", imageIDs));
-        return Optional.of(getImageWithDataList(listAllImages));
+        final GridFSFindIterable files = BUCKET.find(Filters.in("_id", imageIDs));
+        List<ImageSummaryData> result = new ArrayList<>();
+        for (GridFSFile file : files) {
+            result.add(new ImageSummaryData(
+                    file.getObjectId().toHexString(),
+                    file.getFilename(),
+                    file.getMetadata()
+            ));
+        }
+        return Optional.of(result);
     }
 
-    private List<ImageWithMetaData> getImageWithDataList(GridFSFindIterable list) {
-        final List<ImageWithMetaData> result = new ArrayList<>();
+    private List<ImageWithIDData> getImageWithDataList(GridFSFindIterable list) {
+        final List<ImageWithIDData> result = new ArrayList<>();
 
         for (GridFSFile file : list) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             BUCKET.downloadToStream(file.getObjectId(), out);
 
-            ImageWithMetaData entry = new ImageWithMetaData(
+            ImageWithIDData entry = new ImageWithIDData(
                     file.getObjectId().toHexString(),
                     file.getFilename(),
                     file.getMetadata(),
@@ -169,11 +176,11 @@ public class ImageService {
         return Optional.ofNullable(BUCKET.find().filter(Filters.eq("imageId", id)).first());
     }
 
-    private ImageWithMetaData buildImageWithData(GridFSFile file) {
+    private ImageWithIDData buildImageWithData(GridFSFile file) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BUCKET.downloadToStream(file.getObjectId(), out);
 
-        return new ImageWithMetaData(
+        return new ImageWithIDData(
                 file.getObjectId().toHexString(),
                 file.getFilename(),
                 file.getMetadata(), // Document
