@@ -29,7 +29,7 @@ public class ImageController {
 
     private static final String API_PREFIX = "/api/image/";
     private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + "save", API_PREFIX + "findid", API_PREFIX + "allforuser",
-            API_PREFIX + "delete"));
+            API_PREFIX + "delete", API_PREFIX + "allpublic"));
 
     private static final String USER_COLLECTION_NAME = "users";
     private static final MongoRepo userDB = MongoRepo.getInstance();
@@ -61,9 +61,32 @@ public class ImageController {
                     return findAllImagesForUser(method, exchange);
                 case 3:
                     return delete(method, exchange);
+                case 4:
+                    return findAllImagesForPublic(method, exchange);
             }
         }
         throw new IllegalArgumentException("Invalid path");
+    }
+
+    private static boolean findAllImagesForPublic(String method, HttpExchange exchange) {
+        final ImageService imageService = ImageService.getInstance();
+        List<ImageSummaryData> images = imageService.findAllImages();
+
+        try {
+            final Gson gson = new GsonBuilder().create();
+            final String json = gson.toJson(images);
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+            exchange.sendResponseHeaders(200, bytes.length);
+
+            OutputStream os = exchange.getResponseBody();
+            os.write(bytes);
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Error writing response", e);
+            sendErrorResponse(exchange, 500, "Internal server error");
+        }
+        return true;
     }
 
     private static boolean findAllImagesForUser(String method, HttpExchange exchange) {
@@ -122,7 +145,6 @@ public class ImageController {
                 } else {
                     sendErrorResponse(exchange, 500, "Error processing save request");
                 }
-
             } catch (UserNotFoundException e) {
                 sendErrorResponse(exchange, 400, "User not found");
             } catch (IOException e) {
@@ -184,5 +206,4 @@ public class ImageController {
         }
         return false;
     }
-
 }

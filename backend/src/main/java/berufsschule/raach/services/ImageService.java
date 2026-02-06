@@ -111,10 +111,10 @@ public class ImageService {
         return false;
     }
 
-    public List<ImageWithIDData> findAllImages() {
+    public List<ImageSummaryData> findAllImages() {
         GridFSFindIterable listAllImages = getAllImages();
 
-        return getImageWithDataList(listAllImages);
+        return getImageSummaryWithDataList(listAllImages);
     }
 
     public Optional<List<ImageSummaryData>> getAllImageSummariesForUser(HttpExchange exc) {
@@ -145,6 +145,23 @@ public class ImageService {
                     file.getFilename(),
                     file.getMetadata(),
                     out.toByteArray());
+
+            result.add(entry);
+        }
+        return result;
+    }
+
+    private List<ImageSummaryData> getImageSummaryWithDataList(GridFSFindIterable list) {
+        final List<ImageSummaryData> result = new ArrayList<>();
+
+        for (GridFSFile file : list) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            BUCKET.downloadToStream(file.getObjectId(), out);
+
+            ImageSummaryData entry = new ImageSummaryData(
+                    file.getObjectId().toHexString(),
+                    file.getFilename(),
+                    file.getMetadata());
 
             result.add(entry);
         }
