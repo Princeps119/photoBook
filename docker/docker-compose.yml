@@ -26,9 +26,10 @@ services:
     restart: always
     environment:
       TZ: "Europe/Berlin"
-      MONGO_INITDB_ROOT_USERNAME: snake_backend
-      MONGO_INITDB_ROOT_PASSWORD: snakesLikeToHisss222
-      MONGO_INITDB_DATABASE: snake_userData
+      MONGO_INITDB_ROOT_USERNAME: photobook_backend
+      MONGO_INITDB_ROOT_PASSWORD: photobook_backend
+      MONGO_INITDB_DATABASE: photobook
+
     # for local development (ich musste 27018 freigeben, weil auf arbeitsrechener 27017 belegt ist)
     container_name: mongoDB
     ports:
