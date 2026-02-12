@@ -225,7 +225,7 @@ public class ImageService {
     }
 
     private GridFSFindIterable getAllImages() {
-        return BUCKET.find().filter(eq("tag", ImageTag.Public));
+        return BUCKET.find().filter(eq("metadata.tag", ImageTag.Public));
     }
 
     private boolean checkUserAuthForImageId(HttpExchange exchange, ObjectId id) {
