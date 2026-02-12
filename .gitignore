@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/backend/src/main/resources/uri.txt
+/backend/src/main/resources/encryption.txt
+/backend/src/main/resources/config.properties

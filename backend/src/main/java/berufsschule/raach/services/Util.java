@@ -77,6 +77,13 @@ public class Util {
                                          final int statusCode,
                                          final String errorMsg) {
         try (exchange) {
+
+            if (exchange.getResponseCode() != -1) {
+                // headers already sent → exit method
+                logger.log(Level.WARNING, "Headers already sent");
+                return;
+            }
+
             // Create structured JSON error response following RFC 7807
             String jsonResponse = String.format(
                     "{\"type\": \"about:blank\", \"title\": \"Error\", \"status\": %d, \"detail\": \"%s\"}",
@@ -121,6 +128,7 @@ public class Util {
         TokenData tokenData;
         try {
             final JsonReader reader = new JsonReader(new StringReader(tokenJson));
+            logger.log(Level.INFO, "Token in Backend check:  ", tokenJson);
             final Gson gson = new GsonBuilder().create();
             final Type tokenType = new TypeToken<TokenData>() {
             }.getType();
@@ -185,8 +193,8 @@ public class Util {
 
         long slashCount = path.chars().filter(ch -> ch == '/').count();
 
-        if (slashCount == 3 && path.contains("image")) {
-            return path;
+        if (slashCount >= 3 && path.contains("image")) {
+            return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
         } else {
             logger.log(Level.SEVERE, "Issue pathing", path);
             sendErrorResponse(exchange, 400, "Invalid JSON format");

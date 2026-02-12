@@ -28,8 +28,14 @@ public class ImageController {
     public static final Logger logger = Logger.getLogger(ImageController.class.getName());
 
     private static final String API_PREFIX = "/api/image/";
-    private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + "save", API_PREFIX + "findid", API_PREFIX + "allforuser",
-            API_PREFIX + "delete", API_PREFIX + "allpublic"));
+    private static final String API_ENDPOINT_SAVE = "save";
+    private static final String API_ENDPOINT_FIND_ID = "findid";
+    private static final String API_ENDPOINT_ALL_FOR_USER = "allforuser";
+    private static final String API_ENDPOINT_DELETE = "delete";
+    private static final String API_ENDPOINT_ALL_PUBLIC = "allpublic";
+
+    private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + API_ENDPOINT_SAVE, API_PREFIX + API_ENDPOINT_FIND_ID, API_PREFIX + API_ENDPOINT_ALL_FOR_USER,
+            API_PREFIX + API_ENDPOINT_DELETE, API_PREFIX + API_ENDPOINT_ALL_PUBLIC));
 
     private static final String USER_COLLECTION_NAME = "users";
     private static final MongoRepo userDB = MongoRepo.getInstance();
@@ -49,9 +55,26 @@ public class ImageController {
     private static boolean checkImageMapping(String path, String method, HttpExchange exchange) {
         final String checkedPath = checkPathImage(path, exchange);
 
-        if (mapping.contains(checkedPath)) {
+
+        String deletePathWithoutId = null;
+        final String token = API_ENDPOINT_DELETE;
+
+        if (checkedPath != null) {
+            int pos = checkedPath.indexOf(token);
+            if (pos >= 0) {
+                deletePathWithoutId = checkedPath.substring(0, pos + token.length());
+            }
+        }
+
+        // Pick either deletePathWithoutId OR checkedPath
+        final String key = (deletePathWithoutId != null) ? deletePathWithoutId : checkedPath;
+
+        // Check mapping only once
+        int mappedPath = mapping.indexOf(key);
+
+        if (mappedPath >= 0) {
             logger.log(Level.INFO, "Mapping found for {0}", path);
-            final int mappedPath = mapping.indexOf(path);
+
             switch (mappedPath) {
                 case 0:
                     return save(method, exchange);
@@ -62,13 +85,13 @@ public class ImageController {
                 case 3:
                     return delete(method, exchange);
                 case 4:
-                    return findAllImagesForPublic(method, exchange);
+                    return findAllImagesForPublic(exchange);
             }
         }
         throw new IllegalArgumentException("Invalid path");
     }
 
-    private static boolean findAllImagesForPublic(String method, HttpExchange exchange) {
+    private static boolean findAllImagesForPublic(HttpExchange exchange) {
         final ImageService imageService = ImageService.getInstance();
         List<ImageSummaryData> images = imageService.findAllImages();
 
@@ -90,7 +113,7 @@ public class ImageController {
     }
 
     private static boolean findAllImagesForUser(String method, HttpExchange exchange) {
-        if (!method.equals(GET)) {
+        if (method.equals(GET)) {
             try {
                 final ImageService imageService = ImageService.getInstance();
                 Optional<List<ImageSummaryData>> imagesOp = imageService.getAllImageSummariesForUser(exchange);

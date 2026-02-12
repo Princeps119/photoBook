@@ -51,22 +51,6 @@
                 </executions>
             </plugin>
 
-            <!-- Optional: Manifest entries (used only if you run with `java -jar`) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <!-- Since Main.java is in default package -->
-                            <mainClass>berufsschule.raach.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>
