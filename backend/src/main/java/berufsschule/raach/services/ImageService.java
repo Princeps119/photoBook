@@ -31,6 +31,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static berufsschule.raach.services.Util.checkLoginToken;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
 
 public class ImageService {
 
@@ -71,7 +73,7 @@ public class ImageService {
             ObjectId id = BUCKET.uploadFromStream(uploadData.filename(), is, options);
 
             USER_DB.getCollection("users").updateOne(
-                    Filters.eq("mail", decryptedMail),
+                    eq("mail", decryptedMail),
                     Updates.push("imageIds", id)
             );
 
@@ -187,10 +189,16 @@ public class ImageService {
         GridFSFile imageFile = null;
 
         if (tag.equals(ImageTag.Private)) {
-            imageFile = BUCKET.find().filter(Filters.eq("imageId", id)).filter(Filters.eq("tag", tag)).first();
+            imageFile = BUCKET.find(and(
+                    eq("_id", id),
+                    eq("metadata.tag", tag))
+            ).first();
 
         } else if (tag.equals(ImageTag.Public)) {
-            imageFile = BUCKET.find().filter(Filters.eq("imageId", id)).filter(Filters.eq("tag", tag)).first();
+            imageFile = BUCKET.find(and(
+                            eq("_id", id),
+                            eq("metadata.tag", tag))
+            ).first();
 
         }
 
@@ -201,7 +209,7 @@ public class ImageService {
     }
 
     private Optional<GridFSFile> getImageWithId(ObjectId id) {
-        return Optional.ofNullable(BUCKET.find().filter(Filters.eq("imageId", id)).first());
+        return Optional.ofNullable(BUCKET.find().filter(eq("_id", id)).first());
     }
 
     private ImageWithIDData buildImageWithData(GridFSFile file) {
@@ -217,7 +225,7 @@ public class ImageService {
     }
 
     private GridFSFindIterable getAllImages() {
-        return BUCKET.find().filter(Filters.eq("tag", ImageTag.Public));
+        return BUCKET.find().filter(eq("tag", ImageTag.Public));
     }
 
     private boolean checkUserAuthForImageId(HttpExchange exchange, ObjectId id) {
@@ -232,7 +240,7 @@ public class ImageService {
 
     private Document  getUser(HttpExchange exchange) {
         final String decryptedMail = checkLoginToken(exchange, userCollection);
-        return userCollection.find(Filters.eq("mail", decryptedMail)).first();
+        return userCollection.find(eq("mail", decryptedMail)).first();
     }
     
     private List<ObjectId> checkUserAuthAndGetImageIds(HttpExchange exchange) {
