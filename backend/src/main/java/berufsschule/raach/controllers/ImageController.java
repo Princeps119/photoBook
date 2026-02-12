@@ -180,6 +180,7 @@ public class ImageController {
     private static Boolean findImageById(String method, HttpExchange exchange) {
         if (method.equals(GET)) {
             try {
+                if (checkLoginToken(exchange, userDB.getUserCollection(USER_COLLECTION_NAME)) != null);
                 final ImageService imageService = ImageService.getInstance();
 
                 final Map<String, String> queryMap = getQueryToMap(exchange.getRequestURI().getQuery());

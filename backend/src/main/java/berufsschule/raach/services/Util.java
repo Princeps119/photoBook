@@ -127,8 +127,8 @@ public class Util {
 
         TokenData tokenData;
         try {
+            logger.log(Level.INFO, "Token in Backend check:  " + tokenJson);
             final JsonReader reader = new JsonReader(new StringReader(tokenJson));
-            logger.log(Level.INFO, "Token in Backend check:  ", tokenJson);
             final Gson gson = new GsonBuilder().create();
             final Type tokenType = new TypeToken<TokenData>() {
             }.getType();
@@ -230,9 +230,21 @@ public class Util {
                 .lines()
                 .collect(Collectors.joining("\n"));
 
-        logger.log(Level.INFO, "got RequestBody: {0}", body);
+        logger.log(Level.INFO, "got RequestBody: {0}", logPartOfRequestBody(body));
 
         return new JsonReader(new StringReader(body));
+    }
+
+    private static String logPartOfRequestBody(String body) {
+    //prevent the whole image string from being logged as it is waaay to big
+        String keyword = "base64";
+        int idx = body.indexOf(keyword);
+
+        if (idx != -1) {
+            return body.substring(0, idx + keyword.length());
+        } else {
+            return body;
+        }
     }
 
 

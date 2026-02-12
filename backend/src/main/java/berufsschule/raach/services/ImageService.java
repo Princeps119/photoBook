@@ -63,6 +63,10 @@ public class ImageService {
             logger.log(Level.SEVERE, "Database or Bucket not initialized");
             return false;
         }
+        if (uploadData == null || uploadData.image() == null || uploadData.filename() == null) {
+            logger.log(Level.WARNING, "Invalid payload, uploadData is null");
+            return false;
+        }
 
         GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
