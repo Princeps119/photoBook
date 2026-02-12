@@ -51,7 +51,7 @@ public class ImageController {
 
         if (mapping.contains(checkedPath)) {
             logger.log(Level.INFO, "Mapping found for {0}", path);
-            final int mappedPath = mapping.indexOf(path);
+            final int mappedPath = mapping.indexOf(checkedPath);
             switch (mappedPath) {
                 case 0:
                     return save(method, exchange);

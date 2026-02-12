@@ -185,8 +185,8 @@ public class Util {
 
         long slashCount = path.chars().filter(ch -> ch == '/').count();
 
-        if (slashCount == 3 && path.contains("image")) {
-            return path;
+        if (slashCount >= 3 && path.contains("image")) {
+            return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
         } else {
             logger.log(Level.SEVERE, "Issue pathing", path);
             sendErrorResponse(exchange, 400, "Invalid JSON format");
