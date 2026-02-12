@@ -128,6 +128,7 @@ public class Util {
         TokenData tokenData;
         try {
             final JsonReader reader = new JsonReader(new StringReader(tokenJson));
+            logger.log(Level.INFO, "Token in Backend check:  ", tokenJson);
             final Gson gson = new GsonBuilder().create();
             final Type tokenType = new TypeToken<TokenData>() {
             }.getType();
