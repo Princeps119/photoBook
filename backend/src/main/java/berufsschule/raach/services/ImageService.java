@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -36,7 +37,7 @@ public class ImageService {
     private static final Logger logger = Logger.getLogger(ImageService.class.getName());
     private static final MongoDatabase USER_DB = MongoRepo.getInstance().getUserDB();
     private static final MongoDatabase IMAGE_DB = MongoRepo.getInstance().getImageDB();
-    private static final GridFSBucket BUCKET = GridFSBuckets.create(IMAGE_DB, "userImages");
+    private static final GridFSBucket BUCKET = IMAGE_DB != null ? GridFSBuckets.create(IMAGE_DB, "userImages") : null;
 
     private static ImageService instance;
     private static final String USER_COLLECTION_NAME = "users";
@@ -56,11 +57,17 @@ public class ImageService {
     }
 
     public boolean saveImage(ImageUploadData uploadData, final String decryptedMail) {
+        if (BUCKET == null || USER_DB == null) {
+            logger.log(Level.SEVERE, "Database or Bucket not initialized");
+            return false;
+        }
 
         GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
+        byte[] imageBytes = Base64.getDecoder().decode(uploadData.image().base64());
+
         // Convert bytes to InputStream
-        try (InputStream is = new java.io.ByteArrayInputStream(uploadData.image().byteArray())) {
+        try (InputStream is = new java.io.ByteArrayInputStream(imageBytes)) {
             ObjectId id = BUCKET.uploadFromStream(uploadData.filename(), is, options);
 
             USER_DB.getCollection("users").updateOne(
@@ -93,6 +100,10 @@ public class ImageService {
     }
 
     public boolean deleteById(HttpExchange exchange) throws DbSearchException {
+        if (BUCKET == null) {
+            logger.log(Level.SEVERE, "Bucket not initialized");
+            return false;
+        }
         final String path = exchange.getRequestURI().getPath();
 
         final String[] segments = path.split("/");
@@ -144,7 +155,7 @@ public class ImageService {
                     file.getObjectId().toHexString(),
                     file.getFilename(),
                     file.getMetadata(),
-                    out.toByteArray());
+                    Base64.getEncoder().encodeToString(out.toByteArray()));
 
             result.add(entry);
         }
@@ -201,7 +212,7 @@ public class ImageService {
                 file.getObjectId().toHexString(),
                 file.getFilename(),
                 file.getMetadata(), // Document
-                out.toByteArray()
+                Base64.getEncoder().encodeToString(out.toByteArray())
         );
     }
 

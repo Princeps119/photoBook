@@ -8,7 +8,7 @@ import org.bson.Document;
  * @param hexStringId the MongoDB/GridFSFile id of the image, from the backend
  * @param filename name of the image
  * @param metadata must contain a tag key with either Private or Public value
- * @param byteArray the image itself
+ * @param base64 the image itself
  *<p>
  * Mock JSON
  *<p>
@@ -28,5 +28,5 @@ import org.bson.Document;
  </p>
 
  */
-public record ImageWithIDData(String hexStringId, String filename, @NonNull Document metadata, @NonNull byte[] byteArray) {}
+public record ImageWithIDData(String hexStringId, String filename, @NonNull Document metadata, @NonNull String base64) {}
 

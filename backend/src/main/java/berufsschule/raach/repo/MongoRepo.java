@@ -36,25 +36,32 @@ public class MongoRepo {
     private final MongoDatabase imageDB;
 
     private MongoRepo() {
-        MongoDatabase userDatabase;
-        MongoDatabase imageDatabase;
+        MongoDatabase userDatabase = null;
+        MongoDatabase imageDatabase = null;
         MongoClient client;
         try {
-            final String uri = Files.readString(SECRET_PATH).trim();
+            String uri = null;
+            if (Files.exists(SECRET_PATH)) {
+                uri = Files.readString(SECRET_PATH).trim();
+            }
 
-            if (uri.isBlank()) {
+            if (uri == null || uri.isBlank()) {
+                System.err.println("MONGO_URI_FILE is not set or empty! Falling back to uri.txt");
+                Path localUriPath = Paths.get("backend/src/main/resources/uri.txt");
+                if (Files.exists(localUriPath)) {
+                    uri = Files.readString(localUriPath).trim();
+                }
+            }
 
-                throw new IllegalStateException("MONGO_URI environment variable is not set!");
-
+            if (uri == null || uri.isBlank()) {
+                System.err.println("Could not find a valid MongoDB URI.");
             } else {
                 client = MongoClients.create(uri);
                 userDatabase = client.getDatabase("photobook_users");
                 imageDatabase = client.getDatabase("photobook_images");
             }
         } catch (IOException e) {
-           System.err.println("Could not read MONGO_URI_FILE");
-            userDatabase = null;
-            imageDatabase = null;
+            System.err.println("Could not read MONGO_URI_FILE: " + e.getMessage());
         }
 
         if (userDatabase == null) {
@@ -72,6 +79,10 @@ public class MongoRepo {
     }
 
     public MongoDatabase getImageDB() {
+        if (imageDB == null) {
+            System.err.println("imageDB not initialized.");
+            return null;
+        }
         boolean exists = imageDB.listCollectionNames()
                 .into(new ArrayList<>())
                 .contains("images");
@@ -80,10 +91,14 @@ public class MongoRepo {
             imageDB.createCollection("images");
             createExampleUser();
         }
-        return userDB;
+        return imageDB;
     }
 
     public MongoDatabase getUserDB() {
+        if (userDB == null) {
+            System.err.println("userDB not initialized.");
+            return null;
+        }
         boolean exists = userDB.listCollectionNames()
                 .into(new ArrayList<>())
                 .contains("users");
