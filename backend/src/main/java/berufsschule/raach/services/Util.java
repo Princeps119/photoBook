@@ -230,9 +230,21 @@ public class Util {
                 .lines()
                 .collect(Collectors.joining("\n"));
 
-        //logger.log(Level.INFO, "got RequestBody: {0}", body);  only use for debugging as base64 image is too big on the log
+        logger.log(Level.INFO, "got RequestBody: {0}", logPartOfRequestBody(body));
 
         return new JsonReader(new StringReader(body));
+    }
+
+    private static String logPartOfRequestBody(String body) {
+    //prevent the whole image string from being logged as it is waaay to big
+        String keyword = "base64";
+        int idx = body.indexOf(keyword);
+
+        if (idx != -1) {
+            return body.substring(0, idx + keyword.length());
+        } else {
+            return body;
+        }
     }
 
 
