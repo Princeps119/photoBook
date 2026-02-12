@@ -90,7 +90,7 @@ public class ImageController {
     }
 
     private static boolean findAllImagesForUser(String method, HttpExchange exchange) {
-        if (!method.equals(GET)) {
+        if (method.equals(GET)) {
             try {
                 final ImageService imageService = ImageService.getInstance();
                 Optional<List<ImageSummaryData>> imagesOp = imageService.getAllImageSummariesForUser(exchange);
