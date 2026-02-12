@@ -127,8 +127,8 @@ public class Util {
 
         TokenData tokenData;
         try {
+            logger.log(Level.INFO, "Token in Backend check:  " + tokenJson);
             final JsonReader reader = new JsonReader(new StringReader(tokenJson));
-            logger.log(Level.INFO, "Token in Backend check:  ", tokenJson);
             final Gson gson = new GsonBuilder().create();
             final Type tokenType = new TypeToken<TokenData>() {
             }.getType();
@@ -230,7 +230,7 @@ public class Util {
                 .lines()
                 .collect(Collectors.joining("\n"));
 
-        logger.log(Level.INFO, "got RequestBody: {0}", body);
+        //logger.log(Level.INFO, "got RequestBody: {0}", body);  only use for debugging as base64 image is too big on the log
 
         return new JsonReader(new StringReader(body));
     }
