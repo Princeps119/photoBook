@@ -1,4 +1,4 @@
-#to run from root: execute in Terminal docker-compose -f docker/docker-compose.yml up --build -d
+#to run from root: execute in Terminal docker-compose -p photobook -f docker/docker-compose.yml up --build -d
 services:
   backend:
     build:
