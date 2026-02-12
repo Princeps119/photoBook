@@ -77,6 +77,13 @@ public class Util {
                                          final int statusCode,
                                          final String errorMsg) {
         try (exchange) {
+
+            if (exchange.getResponseCode() != -1) {
+                // headers already sent → exit method
+                logger.log(Level.WARNING, "Headers already sent");
+                return;
+            }
+
             // Create structured JSON error response following RFC 7807
             String jsonResponse = String.format(
                     "{\"type\": \"about:blank\", \"title\": \"Error\", \"status\": %d, \"detail\": \"%s\"}",
