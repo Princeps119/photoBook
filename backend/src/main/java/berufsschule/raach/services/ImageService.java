@@ -71,7 +71,13 @@ public class ImageService {
         GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
         byte[] imageBytes = Base64.getDecoder().decode(uploadData.image().base64());
+        long maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
 
+        if (imageBytes.length > maxSizeInBytes) {
+            logger.log(Level.WARNING, "Image is too large, max size is 10 MB");
+
+            throw new DBSaveException("Image is too large, max size is 10 MB");
+        }
         // Convert bytes to InputStream
         try (InputStream is = new java.io.ByteArrayInputStream(imageBytes)) {
             ObjectId id = BUCKET.uploadFromStream(uploadData.filename(), is, options);

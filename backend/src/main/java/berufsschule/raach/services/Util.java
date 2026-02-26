@@ -2,6 +2,8 @@ package berufsschule.raach.services;
 
 
 import berufsschule.raach.data.TokenData;
+import berufsschule.raach.data.imageData.ImageSummaryData;
+import berufsschule.raach.data.imageData.ImageWithIDData;
 import berufsschule.raach.exeptions.UserNotFoundException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,23 +14,14 @@ import com.mongodb.client.model.Filters;
 import com.sun.net.httpserver.HttpExchange;
 import org.bson.Document;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -263,4 +256,21 @@ public class Util {
         return result;
     }
 
+    public static  byte[] createByteArray(TokenData token){
+        final Gson gson = new GsonBuilder().create();
+        final String jsonResponse = gson.toJson(token);
+        return jsonResponse.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static byte[] createByteArray(List<ImageSummaryData> images) {
+        final Gson gson = new GsonBuilder().create();
+        final String json = gson.toJson(images);
+        return json.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static byte[] createByteArray(ImageWithIDData image) {
+        final Gson gson = new GsonBuilder().create();
+        final String json = gson.toJson(image);
+        return json.getBytes(StandardCharsets.UTF_8);
+    }
 }

@@ -4,18 +4,16 @@ import berufsschule.raach.data.imageData.ImageSummaryData;
 import berufsschule.raach.data.imageData.ImageTag;
 import berufsschule.raach.data.imageData.ImageUploadData;
 import berufsschule.raach.data.imageData.ImageWithIDData;
+import berufsschule.raach.exeptions.DBSaveException;
 import berufsschule.raach.exeptions.DbSearchException;
 import berufsschule.raach.exeptions.UserNotFoundException;
 import berufsschule.raach.repo.MongoRepo;
 import berufsschule.raach.services.ImageService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import org.bson.types.ObjectId;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,9 +94,7 @@ public class ImageController {
         List<ImageSummaryData> images = imageService.findAllImages();
 
         try {
-            final Gson gson = new GsonBuilder().create();
-            final String json = gson.toJson(images);
-            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+           byte[] bytes = createByteArray(images);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
             exchange.sendResponseHeaders(200, bytes.length);
@@ -122,9 +118,7 @@ public class ImageController {
                     try {
                         logger.log(Level.INFO, "Found {0} images for user", images.size());
 
-                        final Gson gson = new GsonBuilder().create();
-                        final String json = gson.toJson(images);
-                        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+                        byte[] bytes = createByteArray(images);
 
                         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
                         exchange.sendResponseHeaders(200, bytes.length);
@@ -168,6 +162,8 @@ public class ImageController {
                 } else {
                     sendErrorResponse(exchange, 500, "Error processing save request");
                 }
+            } catch (DBSaveException e) {
+                sendErrorResponse(exchange, 413, "Image too big"); // 413 = Request Entity too Large
             } catch (UserNotFoundException e) {
                 sendErrorResponse(exchange, 400, "User not found");
             } catch (IOException e) {
@@ -193,9 +189,7 @@ public class ImageController {
                 final Optional<ImageWithIDData> foundImageOpt = imageService.findImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
 
                 if (foundImageOpt.isPresent()) {
-                    final Gson gson = new GsonBuilder().create();
-                    final String json = gson.toJson(foundImageOpt.get());
-                    byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+                    byte[] bytes = createByteArray(foundImageOpt.get());
 
                     exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
                     exchange.sendResponseHeaders(200, bytes.length);
