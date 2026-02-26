@@ -1,9 +1,6 @@
 package berufsschule.raach.services;
 
-import berufsschule.raach.data.imageData.ImageSummaryData;
-import berufsschule.raach.data.imageData.ImageTag;
-import berufsschule.raach.data.imageData.ImageUploadData;
-import berufsschule.raach.data.imageData.ImageWithIDData;
+import berufsschule.raach.data.imageData.*;
 import berufsschule.raach.exeptions.DBSaveException;
 import berufsschule.raach.exeptions.DbSearchException;
 import berufsschule.raach.repo.MongoRepo;
@@ -71,13 +68,14 @@ public class ImageService {
         GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
         byte[] imageBytes = Base64.getDecoder().decode(uploadData.image().base64());
-        long maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
+        final long maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
 
         if (imageBytes.length > maxSizeInBytes) {
             logger.log(Level.WARNING, "Image is too large, max size is 10 MB");
 
             throw new DBSaveException("Image is too large, max size is 10 MB");
         }
+
         // Convert bytes to InputStream
         try (InputStream is = new java.io.ByteArrayInputStream(imageBytes)) {
             ObjectId id = BUCKET.uploadFromStream(uploadData.filename(), is, options);
@@ -106,7 +104,7 @@ public class ImageService {
 
             final GridFSFile file = imageFileOpt.get();
 
-            return Optional.of(buildImageWithData(file));
+            return Optional.ofNullable(buildImageWithData(file));
 
         } else throw new DbSearchException("could not find an Image");
     }
@@ -156,24 +154,6 @@ public class ImageService {
         return Optional.of(result);
     }
 
-    private List<ImageWithIDData> getImageWithDataList(GridFSFindIterable list) {
-        final List<ImageWithIDData> result = new ArrayList<>();
-
-        for (GridFSFile file : list) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            BUCKET.downloadToStream(file.getObjectId(), out);
-
-            ImageWithIDData entry = new ImageWithIDData(
-                    file.getObjectId().toHexString(),
-                    file.getFilename(),
-                    file.getMetadata(),
-                    Base64.getEncoder().encodeToString(out.toByteArray()));
-
-            result.add(entry);
-        }
-        return result;
-    }
-
     private List<ImageSummaryData> getImageSummaryWithDataList(GridFSFindIterable list) {
         final List<ImageSummaryData> result = new ArrayList<>();
 
@@ -209,7 +189,6 @@ public class ImageService {
                             eq("_id", id),
                             eq("metadata.tag", tag))
             ).first();
-
         }
 
         if (imageFile == null) {
@@ -226,11 +205,15 @@ public class ImageService {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BUCKET.downloadToStream(file.getObjectId(), out);
 
+        if (file.getMetadata() == null) {
+            return null;
+        }
+
         return new ImageWithIDData(
                 file.getObjectId().toHexString(),
                 file.getFilename(),
                 file.getMetadata(), // Document
-                Base64.getEncoder().encodeToString(out.toByteArray())
+                new ImageArrayData(Base64.getEncoder().encodeToString(out.toByteArray()))
         );
     }
 
@@ -248,7 +231,7 @@ public class ImageService {
         return false;
     }
 
-    private Document  getUser(HttpExchange exchange) {
+    private Document getUser(HttpExchange exchange) {
         final String decryptedMail = checkLoginToken(exchange, userCollection);
         return userCollection.find(eq("mail", decryptedMail)).first();
     }

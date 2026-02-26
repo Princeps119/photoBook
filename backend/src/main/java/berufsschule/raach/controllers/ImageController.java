@@ -53,7 +53,6 @@ public class ImageController {
     private static boolean checkImageMapping(String path, String method, HttpExchange exchange) {
         final String checkedPath = checkPathImage(path, exchange);
 
-
         String deletePathWithoutId = null;
         final String token = API_ENDPOINT_DELETE;
 
@@ -91,10 +90,10 @@ public class ImageController {
 
     private static boolean findAllImagesForPublic(HttpExchange exchange) {
         final ImageService imageService = ImageService.getInstance();
-        List<ImageSummaryData> images = imageService.findAllImages();
+        final List<ImageSummaryData> images = imageService.findAllImages();
 
         try {
-           byte[] bytes = createByteArray(images);
+            final byte[] bytes = createByteArray(images);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
             exchange.sendResponseHeaders(200, bytes.length);
@@ -112,13 +111,13 @@ public class ImageController {
         if (method.equals(GET)) {
             try {
                 final ImageService imageService = ImageService.getInstance();
-                Optional<List<ImageSummaryData>> imagesOp = imageService.getAllImageSummariesForUser(exchange);
+                final Optional<List<ImageSummaryData>> imagesOp = imageService.getAllImageSummariesForUser(exchange);
 
                 imagesOp.ifPresent(images -> {
                     try {
                         logger.log(Level.INFO, "Found {0} images for user", images.size());
 
-                        byte[] bytes = createByteArray(images);
+                        final byte[] bytes = createByteArray(images);
 
                         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
                         exchange.sendResponseHeaders(200, bytes.length);
@@ -176,28 +175,30 @@ public class ImageController {
     private static Boolean findImageById(String method, HttpExchange exchange) {
         if (method.equals(GET)) {
             try {
-                if (checkLoginToken(exchange, userDB.getUserCollection(USER_COLLECTION_NAME)) != null);
-                final ImageService imageService = ImageService.getInstance();
+                if (checkLoginToken(exchange, userDB.getUserCollection(USER_COLLECTION_NAME)) != null) {
+                    final ImageService imageService = ImageService.getInstance();
 
-                final Map<String, String> queryMap = getQueryToMap(exchange.getRequestURI().getQuery());
+                    final Map<String, String> queryMap = getQueryToMap(exchange.getRequestURI().getQuery());
 
-                if (!queryMap.containsKey("id") && !queryMap.containsKey("tag")) {
-                    sendErrorResponse(exchange, 400, "Invalid payload: id or tag are required");
-                }
-
-                final ObjectId id = new ObjectId(queryMap.get("id"));
-                final Optional<ImageWithIDData> foundImageOpt = imageService.findImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
-
-                if (foundImageOpt.isPresent()) {
-                    byte[] bytes = createByteArray(foundImageOpt.get());
-
-                    exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-                    exchange.sendResponseHeaders(200, bytes.length);
-
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(bytes);
+                    if (!queryMap.containsKey("id") && !queryMap.containsKey("tag")) {
+                        sendErrorResponse(exchange, 400, "Invalid payload: id or tag are required");
                     }
-                    return true;
+
+                    final ObjectId id = new ObjectId(queryMap.get("id"));
+                    final Optional<ImageWithIDData> foundImageOpt = imageService.findImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
+
+                    if (foundImageOpt.isPresent()) {
+                        final byte[] bytes = createByteArray(foundImageOpt.get());
+
+                        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+                        exchange.sendResponseHeaders(200, bytes.length);
+
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(bytes);
+                        }
+                        return true;
+                    }
+                    return false;
                 }
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
