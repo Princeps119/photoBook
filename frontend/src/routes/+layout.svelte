@@ -6,7 +6,7 @@
 
 	let { children } = $props();
 	let pagename = page.url.pathname;
-	let isLoggedIn = false;
+	let isLoggedIn = true; 
 	let title = $state('');
 	if (pagename === '/') {
 		title = 'Galery';

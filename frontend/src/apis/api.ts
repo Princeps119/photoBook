@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = 'http://localhost:8080';
 
 interface RequestOptions {
   method?: string;
@@ -6,8 +6,8 @@ interface RequestOptions {
   body?: any;
 }
 
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const url = `${BASE_URL}${endpoint}`;
+async function request(endpoint: string, options: RequestOptions = {}): Promise<any> {
+  const url = `${endpoint}`;
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -17,6 +17,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     headers: { ...defaultHeaders, ...options.headers },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
+  console.log(response)
 
   if (!response.ok) {
     throw new Error(`API Error: ${response.status} ${response.statusText}`);
@@ -33,7 +34,7 @@ export const api = {
       file: File,
       title: string,
       description: string,
-      type: 'public' | 'private',
+      type: 'Public' | 'Private',
       userEmail: string,
     ) => {
       const formData = new FormData();
@@ -80,8 +81,8 @@ export const api = {
   },
 
   Auth: {
-    login: (email: string, password: string) =>
-      request('/auth/login', { method: 'POST', body: { email, password } }),
+    login: (mail: string, password: string) =>
+      request(`/api/login`, { method: 'POST', body: { mail, password } }),
     register: (email: string, password: string) =>
       request('/auth/register', { method: 'POST', body: { email, password } }),
     logout: () =>

@@ -1,20 +1,21 @@
 <script lang="ts">
     import { api } from "../../apis/api";
+    import { onMount } from "svelte";
 
     interface UploadedFile {
         file: File;
         title: string;
         description: string;
-        type: 'public' | 'private';
+        type: 'Public' | 'Private';
     }
 
-    let uploadedFiles: UploadedFile[] = [];
-    let isUploading = false;
-    let message = '';
-    let isDragOver = false;
-    let userEmail = '';
-    let token = '';
-    let photoType: 'public' | 'private' = 'public';
+    let uploadedFiles: UploadedFile[] = $state([]);
+    let isUploading = $state(false);
+    let message = $state('');
+    let isDragOver = $state(false);
+    let userEmail = $state('');
+    let token = $state('');
+    let photoType: 'Public' | 'Private' = 'Public';
 
     const handleFileSelect = (files: FileList | null) => {
         if (!files) return;
@@ -93,9 +94,15 @@
             isUploading = false;
         }
     };
+    let username: string = $state('');
+
+    onMount(() => {
+        username = localStorage.getItem('username') || '';
+    });
 </script>
 
 <main>
+    <span>{username}</span>
     {#if uploadedFiles.length === 0}
         <div 
             class="upload-container"

@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = 'http://localhost:8080';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   try {
@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const file = formData.get('file') as File;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const type = formData.get('type') as 'public' | 'private';
+    const type = formData.get('type') as 'Public' | 'Private';
     const userEmail = formData.get('userEmail') as string;
 
 
@@ -29,6 +29,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     const buffer = await file.arrayBuffer();
     const base64Data = Buffer.from(buffer).toString('base64');
+    const base64Mock = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
 
     const body = {
       filename: title,
@@ -36,55 +37,66 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         tag: type,
       },
       image: {
-        data: base64Data,
+        base64: base64Data,
       }
     };
 
-    console.log('FILE:', file.name);
-    console.log('BODY:', JSON.stringify(body));
+    console.log('FILE:', title);
+    console.log("locals:", locals);
+    // console.log('BODY:', JSON.stringify(body));
+    console.log('TOKEN:', locals.token);
 
-    return new Response(
-    JSON.stringify({ message: 'test' }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+  //   return new Response(
+  //   JSON.stringify({ message: 'test' }),
+  //   { status: 200, headers: { 'Content-Type': 'application/json' } }
+  // );
 
-    // API aufrufen
-//     const response = await fetch(`${BASE_URL}/photos`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${locals.token}`,
-//       },
-//       body: JSON.stringify(body),
-//     });
+    const response = await fetch(`${BASE_URL}/api/image/save`, {
+      method: 'POST',
+      headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + JSON.stringify(locals.token),
+    },
+      body: JSON.stringify(body),
+    });
 
-//     if (!response.ok) {
-//       throw new Error(`API Error: ${response.status} ${response.statusText}`);
-//     }
+    console.log('API Token for Response Header:', JSON.stringify(locals.token));
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
 
-//     const result = await response.json();
+    console.log('API Response Status:', response.status);
+    const result = response;
+    if (response.ok) {
+      return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    } else {
+      return new Response(
+        JSON.stringify({ error: 'Fehler beim Hochladen' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-//     return new Response(JSON.stringify(result), {
-//       status: 200,
-//       headers: { 'Content-Type': 'application/json' },
-//     });
-//   } catch (error) {
-//     console.error('Upload-Fehler:', error);
-//     return new Response(
-//       JSON.stringify({
-//         error: error instanceof Error ? error.message : 'Upload fehlgeschlagen',
-//       }),
-//       { status: 500, headers: { 'Content-Type': 'application/json' } }
-//     );
-//   }
+    
   } catch (error) {
     console.error('Upload-Fehler:', error);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Upload fehlgeschlagen',
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
+  // } catch (error) {
+  //   console.error('Upload-Fehler:', error);
+  //   return new Response(
+  //     JSON.stringify({
+  //       error: error instanceof Error ? error.message : 'Upload fehlgeschlagen',
+  //     }),
+  //     { status: 200, headers: { 'Content-Type': 'application/json' } }
+  //   );
+  // }
   
 };

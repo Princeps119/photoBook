@@ -1,0 +1,36 @@
+@startuml
+title MainController – Routing & JSON
+
+skinparam classAttributeIconSize 0
+
+class MainController {
+  {static} logger : Logger
+  - mapping : ArrayList<String> = ["/api/login","/api/save","/api/checkBackend","/api/register","/api/delete","/api/load","/api/logout"]
+  {static} POST : String = "POST"
+  {static} GET  : String = "GET"
+  {static} PATCH : String = "PATCH"
+  {static} DELETE : String = "DELETE"
+  {static} CONTENT_TYPE_JSON : String = "application/json"
+
+  + {static} processRequest(exchange : HttpExchange) : Optional<Boolean>
+  - {static} checkMapping(path : String, method : String, exchange : HttpExchange) : Boolean
+  - {static} logout(method : String, exchange : HttpExchange) : boolean
+  - {static} delete(method : String, exchange : HttpExchange) : Boolean
+  - {static} register(method : String, exchange : HttpExchange) : Boolean
+  - {static} login(method : String, exchange : HttpExchange) : boolean
+  - {static} save(method : String, exchange : HttpExchange) : Boolean
+  - {static} load(method : String, exchange : HttpExchange) : Boolean
+  - {static} checkBackend(method : String, exchange : HttpExchange) : Boolean
+}
+
+MainController ..> services.LoginService : login(...), logout(...)
+MainController ..> services.RegistrationService : register(...)
+MainController ..> services.DeletionService : delete(...)
+MainController ..> services.SaveGameService : save(...), load(...)
+MainController ..> data.LoginData
+MainController ..> data.RegisterData
+MainController ..> data.TokenData
+MainController ..> data.SnakePositionData
+MainController ..> Gson : serialize/deserialize
+MainController ..> services.Util : readJSON(...), sendErrorResponse(...)
+@enduml
