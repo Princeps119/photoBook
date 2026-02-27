@@ -182,13 +182,16 @@ public class ImageController {
     private static Boolean findImageById(String method, HttpExchange exchange) {
         if (method.equals(GET)) {
             try {
-                if (checkLoginToken(exchange, userDB.getUserCollection(USER_COLLECTION_NAME)) != null);
+                if (checkLoginToken(exchange, userDB.getUserCollection(USER_COLLECTION_NAME)) == null) {
+                    return false;
+                }
                 final ImageService imageService = ImageService.getInstance();
 
                 final Map<String, String> queryMap = getQueryToMap(exchange.getRequestURI().getQuery());
 
-                if (!queryMap.containsKey("id") && !queryMap.containsKey("tag")) {
-                    sendErrorResponse(exchange, 400, "Invalid payload: id or tag are required");
+                if (!queryMap.containsKey("id") || !queryMap.containsKey("tag")) {
+                    sendErrorResponse(exchange, 400, "Invalid payload: id and tag are required");
+                    return false;
                 }
 
                 final ObjectId id = new ObjectId(queryMap.get("id"));

@@ -33,25 +33,19 @@
 //    console.log('Photos:', photos);
 
 async function handleClick() {
-    const photoId = '698ddae0db2a9d6f50a6ccd9';
     try {
-        const response = await fetch(`/api/photos/${photoId}`, {
+        const photoidresponse = await fetch('http://localhost:8080/api/image/allforuser', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                // This might fail in the browser if token is only in HttpOnly cookies
+                // But this is just for manual testing in the UI
             }
         });
-        
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-        }
-        
-        const photoData = await response.json();
-        console.log('Photo Data Response:', photoData);
+        console.log('Manual fetch status:', photoidresponse.status);
     } catch (error) {
         console.error('Error fetching photo:', error);
     }
-    console.log(`Photo clicked: ${photoId}`);
 }
 </script>
 <main>
@@ -59,8 +53,8 @@ async function handleClick() {
         <span>{photos.length} Photos</span>
         {#each photos as photo}
             <div>
-                <h2>{photo.title}</h2>
-                <img src={photo.url} alt={photo.title} />
+                <h2>{photo.filename}</h2>
+                <img src="/api/photos/{photo.hexStringId}" alt={photo.filename} style="max-width: 300px;" />
             </div>
         {/each}
     </div>

@@ -1,4 +1,4 @@
-import type { PageServerLoad } from "./$types";
+import type {PageServerLoad} from "./$types";
 
 export const load: PageServerLoad = async (event) => {
     const token = event.locals.token;
@@ -16,10 +16,14 @@ export const load: PageServerLoad = async (event) => {
                 }
             });
             if (!photoidresponse.ok) {
+                console.error(`API Error: ${photoidresponse.status} ${photoidresponse.statusText}`);
+                const errorText = await photoidresponse.text();
+                console.error(`API Error details: ${errorText}`);
                 throw new Error(`API Error: ${photoidresponse.status} ${photoidresponse.statusText}`);
             }
             
            const photoIds = await photoidresponse.json();
+           console.log('Received photo IDs:', JSON.stringify(photoIds));
             
            photos = photoIds.body || photoIds || [];
         //    console.log('Photos array:', photos);
