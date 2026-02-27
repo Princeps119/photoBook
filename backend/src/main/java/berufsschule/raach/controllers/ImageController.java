@@ -46,8 +46,8 @@ public class ImageController {
 
         final String path = exchange.getRequestURI().getPath();
 
-        logger.log(Level.INFO, "Request Method: {0}, Path: {1}",
-                new Object[]{method, path});
+        logger.log(Level.INFO, "Request Method: {0}, Path: {1}, Query: {2}",
+                new Object[]{method, path, exchange.getRequestURI().getQuery()});
 
         return Optional.of(checkImageMapping(path, method, exchange));
     }
@@ -105,11 +105,14 @@ public class ImageController {
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
             exchange.sendResponseHeaders(200, bytes.length);
 
-            OutputStream os = exchange.getResponseBody();
-            os.write(bytes);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
         } catch (IOException e) {
             logger.log(Level.WARNING, "Error writing response", e);
             sendErrorResponse(exchange, 500, "Internal server error");
+        } finally {
+            exchange.close();
         }
         return true;
     }
@@ -131,18 +134,28 @@ public class ImageController {
                         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
                         exchange.sendResponseHeaders(200, bytes.length);
 
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(bytes);
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(bytes);
+                        }
                     } catch (IOException e) {
                         logger.log(Level.WARNING, "Error writing response", e);
                         sendErrorResponse(exchange, 500, "Internal server error");
                     }
                 });
+                if (imagesOp.isEmpty()) {
+                    try {
+                        exchange.sendResponseHeaders(200, -1);
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, "Error sending headers", e);
+                    }
+                }
                 return true;
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
             } catch (IllegalArgumentException e) {
                 sendErrorResponse(exchange, 400, "Invalid username or password");
+            } finally {
+                exchange.close();
             }
         }
         return false;
@@ -165,7 +178,6 @@ public class ImageController {
 
                 if (result) {
                     exchange.sendResponseHeaders(200, -1);
-                    exchange.close();
                     return true;
                 } else {
                     sendErrorResponse(exchange, 500, "Error processing save request");
@@ -173,7 +185,10 @@ public class ImageController {
             } catch (UserNotFoundException e) {
                 sendErrorResponse(exchange, 400, "User not found");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                logger.log(Level.WARNING, "IOException in save", e);
+                sendErrorResponse(exchange, 500, "Internal server error");
+            } finally {
+                exchange.close();
             }
         }
         return false;
@@ -211,6 +226,9 @@ public class ImageController {
                     String timestamp = new Date().toString();
                     logger.log(Level.INFO, "sent image timestamp: " + timestamp);
                     return true;
+                } else {
+                    sendErrorResponse(exchange, 404, "Image not found");
+                    return false;
                 }
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
@@ -218,6 +236,8 @@ public class ImageController {
                 sendErrorResponse(exchange, 400, "Invalid username or password");
             } catch (IOException e) {
                 sendErrorResponse(exchange, 500, "Internal server error");
+            } finally {
+                exchange.close();
             }
         }
         return false;
@@ -229,10 +249,11 @@ public class ImageController {
                 final ImageService imageService = ImageService.getInstance();
                 final boolean didDelete = imageService.deleteById(exchange);
                 exchange.sendResponseHeaders(204, -1);
-                exchange.close();
                 return didDelete;
             } catch (IOException e) {
-                sendErrorResponse(exchange, 500, "Error deleting user");
+                sendErrorResponse(exchange, 500, "Error deleting image");
+            } finally {
+                exchange.close();
             }
         }
         return false;

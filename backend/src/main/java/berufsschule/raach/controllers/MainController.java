@@ -29,8 +29,8 @@ public class MainController {
 
             final String path = exchange.getRequestURI().getPath();
 
-            logger.log(Level.INFO, "Request Method: {0}, Path: {1}",
-                    new Object[]{method, path});
+            logger.log(Level.INFO, "Request Method: {0}, Path: {1}, Query: {2}",
+                    new Object[]{method, path, exchange.getRequestURI().getQuery()});
 
             if (path.contains("image")) {
                 return handleImageRequest(exchange);

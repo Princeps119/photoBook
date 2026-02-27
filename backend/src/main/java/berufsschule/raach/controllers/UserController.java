@@ -67,7 +67,6 @@ public class UserController {
                 final boolean result = loginService.logout(loginToken);
                 if (result) {
                     exchange.sendResponseHeaders(200, -1);
-                    exchange.close();
                     return true;
                 } else {
                     sendErrorResponse(exchange, 500, "Error processing logout request");
@@ -76,6 +75,8 @@ public class UserController {
         } catch (EncryptionException | IOException e) {
             logger.log(Level.WARNING, "Error processing logout request", e);
             sendErrorResponse(exchange, 500, "Error processing logout request");
+        } finally {
+            exchange.close();
         }
 
         return false;
@@ -88,11 +89,12 @@ public class UserController {
                 final DeletionService deletionService = DeletionService.getInstance();
                 final boolean didDelete = deletionService.deleteUser(exchange);
                 exchange.sendResponseHeaders(204, -1);
-                exchange.close();
                 return didDelete;
             } catch (IOException e) {
                 sendErrorResponse(exchange, 500, "Error deleting user");
 
+            } finally {
+                exchange.close();
             }
         }
         return false;
@@ -107,7 +109,6 @@ public class UserController {
 
                     if (registrationService.register(registerData)) {
                         exchange.sendResponseHeaders(204, -1);
-                        exchange.close();
                         return true;
                     }
 
@@ -122,6 +123,8 @@ public class UserController {
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Exception", e);
                     sendErrorResponse(exchange, 500, "Internal server error");
+                } finally {
+                    exchange.close();
                 }
             } else {
                 sendErrorResponse(exchange, 400, "Request body is required");

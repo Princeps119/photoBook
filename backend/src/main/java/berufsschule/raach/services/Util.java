@@ -12,23 +12,14 @@ import com.mongodb.client.model.Filters;
 import com.sun.net.httpserver.HttpExchange;
 import org.bson.Document;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -196,12 +187,10 @@ public class Util {
         if (slashCount >= 3 && path.contains("image")) {
             return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
         } else {
-            logger.log(Level.SEVERE, "Issue pathing", path);
+            logger.log(Level.SEVERE, "Issue pathing: {0}", path);
             sendErrorResponse(exchange, 400, "Invalid JSON format");
+            return null;
         }
-        logger.log(Level.SEVERE, "Issue pathing", path);
-        sendErrorResponse(exchange, 400, "Invalid JSON format");
-        return null;
     }
 
     public static String checkPath(final String path, final HttpExchange exchange) {
@@ -217,12 +206,10 @@ public class Util {
         } else if (slashCount == 1) {
             return path;
         } else {
-            logger.log(Level.SEVERE, "Issue pathing", path);
+            logger.log(Level.SEVERE, "Issue pathing: {0}", path);
             sendErrorResponse(exchange, 400, "Invalid JSON format");
+            return null;
         }
-        logger.log(Level.SEVERE, "Issue pathing", path);
-        sendErrorResponse(exchange, 400, "Invalid JSON format");
-        return null;
     }
 
     public static JsonReader createJsonReader(HttpExchange exchange) {
