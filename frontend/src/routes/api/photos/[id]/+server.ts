@@ -35,7 +35,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
         const data = JSON.parse(responseText);
         console.log('API Data received:', JSON.stringify(data).substring(0, 100) + '...');
-        const base64String = data.base64 || data.body || data;
+        const base64String = data.base64 || data.body || (data.image ? data.image.base64 : null) || data;
         
         if (!base64String) {
             console.error('No base64 data found in API response');
@@ -43,9 +43,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
         }
 
         const buffer = Buffer.from(base64String, 'base64');
+        const contentType = data.metadata?.contentType || 'image/png';
+
         return new Response(buffer, {
             headers: {
-                'Content-Type': 'image/jpeg',
+                'Content-Type': contentType,
                 'Cache-Control': 'public, max-age=3600'
             }
         });
