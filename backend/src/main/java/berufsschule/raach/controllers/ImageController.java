@@ -180,9 +180,11 @@ public class ImageController {
                     exchange.sendResponseHeaders(200, -1);
                     return true;
                 } else {
+                    logger.log(Level.WARNING, "Error processing save request");
                     sendErrorResponse(exchange, 500, "Error processing save request");
                 }
             } catch (UserNotFoundException e) {
+                logger.log(Level.WARNING, "UserNotFound in save", e);
                 sendErrorResponse(exchange, 400, "User not found");
             } catch (IOException e) {
                 logger.log(Level.WARNING, "IOException in save", e);
