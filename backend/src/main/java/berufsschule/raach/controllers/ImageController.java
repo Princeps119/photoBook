@@ -76,6 +76,8 @@ public class ImageController {
                 case 0:
                     return save(method, exchange);
                 case 1:
+                    String timestamp = new Date().toString();
+                    logger.log(Level.INFO, "Finding image by id time: " + timestamp);
                     return findImageById(method, exchange);
                 case 2:
                     return findAllImagesForUser(method, exchange);
@@ -196,9 +198,10 @@ public class ImageController {
                         try (OutputStream os = exchange.getResponseBody()) {
                             os.write(bytes);
                         }
+                        String timestamp = new Date().toString();
+                        logger.log(Level.INFO, "sent image timestamp: " + timestamp);
                         return true;
                     }
-                    return false;
                 }
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
