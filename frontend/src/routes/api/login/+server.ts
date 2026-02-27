@@ -82,8 +82,8 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
     secure: true,
     sameSite: 'strict',
     path: '/',
-    // maxAge: 60 * 60 * 24 * 7, // 7 Tage
-    maxAge: 10, // 10 Sekunden für Testzwecke
+    maxAge: 60 * 60 * 24 * 7, // 7 Tage
+    // maxAge: 10, // 10 Sekunden für Testzwecke
   });
     console.log('Login successful, token stored in locals:', responseData);
     console.log("Locals.token : ", locals.token);

@@ -7,6 +7,7 @@ interface RequestOptions {
 }
 
 async function request(endpoint: string, options: RequestOptions = {}): Promise<any> {
+  console.log("API.ts")
   const url = `${endpoint}`;
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -28,8 +29,8 @@ async function request(endpoint: string, options: RequestOptions = {}): Promise<
 
 export const api = {
   Photos: {
-    get: (id?: string) =>
-      request(`/photos${id ? `/${id}` : ''}`),
+    get: (id: string) =>
+      request(`/api/photos/${id}`),
     post: async (
       file: File,
       title: string,
