@@ -41,6 +41,14 @@ public class Main {
                 if (processedRequest.isPresent() && processedRequest.get()) {
                     logger.log(Level.INFO, "Request processed");
                 }
+                if (processedRequest.isPresent() && !processedRequest.get()) {
+                    logger.log(Level.WARNING, "Request not processed");
+                    sendErrorResponse(exchange, 500, "Server error");
+                }
+                if (processedRequest.isEmpty()) {
+                    logger.log(Level.WARNING, "Request opt not present processed");
+                    sendErrorResponse(exchange, 500, "Server error");
+                }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Unhandled exception while processing request", e);
                 sendErrorResponse(exchange, 500, "Internal server error");
