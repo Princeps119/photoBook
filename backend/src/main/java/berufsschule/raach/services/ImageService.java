@@ -100,7 +100,7 @@ public class ImageService {
 
             final GridFSFile file = imageFileOpt.get();
 
-            return Optional.of(buildImageWithData(file));
+            return Optional.ofNullable(buildImageWithData(file));
 
         } else throw new DbSearchException("could not find an Image");
     }
@@ -148,24 +148,6 @@ public class ImageService {
             ));
         }
         return Optional.of(result);
-    }
-
-    private List<ImageWithIDData> getImageWithDataList(GridFSFindIterable list) {
-        final List<ImageWithIDData> result = new ArrayList<>();
-
-        for (GridFSFile file : list) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            BUCKET.downloadToStream(file.getObjectId(), out);
-
-            ImageWithIDData entry = new ImageWithIDData(
-                    file.getObjectId().toHexString(),
-                    file.getFilename(),
-                    file.getMetadata(),
-                    Base64.getEncoder().encodeToString(out.toByteArray()));
-
-            result.add(entry);
-        }
-        return result;
     }
 
     private List<ImageSummaryData> getImageSummaryWithDataList(GridFSFindIterable list) {
@@ -219,6 +201,10 @@ public class ImageService {
     private ImageWithIDData buildImageWithData(GridFSFile file) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BUCKET.downloadToStream(file.getObjectId(), out);
+
+        if (file.getMetadata() == null) {
+            return null;
+        }
 
         return new ImageWithIDData(
                 file.getObjectId().toHexString(),

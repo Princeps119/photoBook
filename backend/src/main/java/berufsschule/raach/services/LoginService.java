@@ -23,7 +23,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static berufsschule.raach.services.Util.*;
+import static berufsschule.raach.services.Util.hashPassword;
+import static berufsschule.raach.services.Util.readJSON;
+import static berufsschule.raach.services.Util.sendErrorResponse;
 
 public class LoginService {
 
@@ -100,8 +102,9 @@ public class LoginService {
         final LoginData loginData = readJSON(exchange, LoginData.class);
 
         // Validate required fields
-        if (loginData == null) {
+        if (loginData == null || loginData.mail() == null || loginData.password() == null) {
             sendErrorResponse(exchange, 400, "Invalid JSON: cannot parse login data");
+
         }
 
         final String mail = loginData.mail();

@@ -10,17 +10,12 @@ import static berufsschule.raach.controllers.ImageController.handleImageRequest;
 import static berufsschule.raach.controllers.UserController.checkMapping;
 import static berufsschule.raach.services.Util.logger;
 
+/**
+ * The main controller class.
+ * Handles all incoming requests.
+ * Decides which controller to use.
+ */
 public class MainController {
-
-    public static final String POST = "POST";
-    public static final String GET = "GET";
-    public static final String PATCH = "PATCH";
-    public static final String DELETE = "DELETE";
-
-
-    public static final String CONTENT_TYPE_JSON = "application/json";
-    public static final String CONTENT_TYPE_IMAGE = "image/png";
-    public static final String CONTENT_TYPE = "Content-Type";
 
     public static Optional<Boolean> processRequest(final HttpExchange exchange) {
         try {

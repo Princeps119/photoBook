@@ -155,9 +155,5 @@ public class MongoRepo {
     public MongoCollection<Document> getUserCollection(final String collectionName) {
         return getUserDB().getCollection(collectionName);
     }
-    public MongoCollection<Document> getImagesCollection(final String collectionName) {
-        return getImageDB().getCollection(collectionName);
-    }
-
 }
 

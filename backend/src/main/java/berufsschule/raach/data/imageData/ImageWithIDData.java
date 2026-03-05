@@ -21,8 +21,8 @@ import org.bson.Document;
                         "tag": "Public",
                         "uploadDate": "2026-02-05T17:40:00Z" -optional-
                         },<p>
-                        "image": {
-                                "byteArray":"iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                "image": {
+                        "byteArray":"iVBORw0KGgoAAAANSUhEUgAAAAUA"
                         }
         }
  </p>

@@ -16,13 +16,21 @@ import org.bson.types.ObjectId;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static berufsschule.raach.controllers.MainController.*;
 import static berufsschule.raach.services.Util.*;
 
+/**
+ *  Controller to handle image requests.
+ *  Can find, save, delete, and list images.
+ */
 public class ImageController {
 
     public static final Logger logger = Logger.getLogger(ImageController.class.getName());
@@ -66,7 +74,7 @@ public class ImageController {
             }
         }
 
-        // Pick either deletePathWithoutId OR checkedPath
+        // Pick either deletePathWithoutId or checkedPath
         final String key = (deletePathWithoutId != null) ? deletePathWithoutId : checkedPath;
 
         // Check mapping only once
@@ -98,16 +106,7 @@ public class ImageController {
         List<ImageSummaryData> images = imageService.findAllImages();
 
         try {
-            final Gson gson = new GsonBuilder().create();
-            final String json = gson.toJson(images);
-            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-
-            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-            exchange.sendResponseHeaders(200, bytes.length);
-
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(bytes);
-            }
+            readListAsJsonAndSendResponse(exchange, images);
         } catch (IOException e) {
             logger.log(Level.WARNING, "Error writing response", e);
             sendErrorResponse(exchange, 500, "Internal server error");
@@ -127,21 +126,13 @@ public class ImageController {
                     try {
                         logger.log(Level.INFO, "Found {0} images for user", images.size());
 
-                        final Gson gson = new GsonBuilder().create();
-                        final String json = gson.toJson(images);
-                        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-
-                        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-                        exchange.sendResponseHeaders(200, bytes.length);
-
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            os.write(bytes);
-                        }
+                        readListAsJsonAndSendResponse(exchange, images);
                     } catch (IOException e) {
                         logger.log(Level.WARNING, "Error writing response", e);
                         sendErrorResponse(exchange, 500, "Internal server error");
                     }
                 });
+                
                 if (imagesOp.isEmpty()) {
                     try {
                         exchange.sendResponseHeaders(200, -1);
@@ -149,7 +140,9 @@ public class ImageController {
                         logger.log(Level.WARNING, "Error sending headers", e);
                     }
                 }
+                
                 return true;
+                
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
             } catch (IllegalArgumentException e) {
@@ -159,6 +152,19 @@ public class ImageController {
             }
         }
         return false;
+    }
+
+    private static void readListAsJsonAndSendResponse(HttpExchange exchange, List<ImageSummaryData> images) throws IOException {
+        final Gson gson = new GsonBuilder().create();
+        final String json = gson.toJson(images);
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+        exchange.getResponseHeaders().set(CONTENT_TYPE, CONTENT_TYPE_JSON_AND_CHARSET);
+        exchange.sendResponseHeaders(200, bytes.length);
+
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
     }
 
     private static Boolean save(String method, HttpExchange exchange) {
@@ -219,7 +225,7 @@ public class ImageController {
                     final String json = gson.toJson(foundImageOpt.get());
                     byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
 
-                    exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+                    exchange.getResponseHeaders().set(CONTENT_TYPE, CONTENT_TYPE_JSON_AND_CHARSET);
                     exchange.sendResponseHeaders(200, bytes.length);
 
                     try (OutputStream os = exchange.getResponseBody()) {

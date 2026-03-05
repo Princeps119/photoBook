@@ -26,15 +26,20 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static berufsschule.raach.controllers.MainController.*;
 import static berufsschule.raach.services.Util.*;
 
+/**
+ * The user controller class.
+ * Handles all incoming requests for user-related operations.
+ * User login, logout, registration, and deletion.
+ */
 public class UserController {
 
     public static final Logger logger = Logger.getLogger(UserController.class.getName());
+    private static final String API_PREFIX = "/api/";
 
-    private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList("/api/login", "/api/checkBackend",
-            "/api/register", "/api/delete", "/api/logout"));
+    private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + "login", API_PREFIX + "checkBackend",
+            API_PREFIX + "register", API_PREFIX + "delete", API_PREFIX + "logout"));
 
     static Optional<Boolean> checkMapping(final String path, final String method, final HttpExchange exchange) throws IllegalArgumentException, IOException {
 
@@ -101,7 +106,7 @@ public class UserController {
     }
 
     private static Boolean register(final String method, final HttpExchange exchange) throws IllegalArgumentException {
-        if (method.equals(POST) && exchange.getRequestHeaders().get("Content-Type").contains(CONTENT_TYPE_JSON)) {
+        if (method.equals(POST) && exchange.getRequestHeaders().get(CONTENT_TYPE).contains(CONTENT_TYPE_JSON)) {
             if (exchange.getRequestBody() != null) {
                 try {
                     final RegisterData registerData = readJSON(exchange, RegisterData.class);
@@ -168,7 +173,7 @@ public class UserController {
             final String jsonResponse = gson.toJson(token);
             final byte[] responseBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
 
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.getResponseHeaders().set(CONTENT_TYPE, "application/json");
             exchange.sendResponseHeaders(200, responseBytes.length);
 
             try (OutputStream os = exchange.getResponseBody()) {

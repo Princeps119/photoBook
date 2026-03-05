@@ -11,6 +11,9 @@ import java.util.logging.Logger;
 
 import static berufsschule.raach.services.Util.sendErrorResponse;
 
+/**
+ *
+ */
 public class Main {
 
     public static final Logger logger = Logger.getLogger(Main.class.getName());
