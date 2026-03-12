@@ -3,11 +3,15 @@ import type {RequestHandler} from './$types';
 
 const BASE_URL = 'http://localhost:8080';
 
-export const GET: RequestHandler = async ({ params, locals }) => {
+export const GET: RequestHandler = async ({ params, locals, url }) => {
     const id = params.id;
     const token = locals.token;
+    const isPublic = url.searchParams.get('tag') === 'Public';
+    const isPublicPhotos = url.searchParams.get('type') === 'Public';
 
-    if (!token) {
+    const userPhotosUrl = `${BASE_URL}/api/image/findid?id=${id}&tag=${isPublic ? 'Public' : 'Private'}`;
+    
+    if (!token && !isPublicPhotos) {
         return json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -15,16 +19,16 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     console.log(`Using token: ${JSON.stringify(locals.token)}`);
 
     try {
-        const url = `${BASE_URL}/api/image/findid?id=${id}&tag=Public`;
+        const url = userPhotosUrl;
         console.log(`Fetching from URL: ${url}`);
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                Authorization: "Bearer " + JSON.stringify(locals.token),
-            }
+            Authorization: "Bearer " + JSON.stringify(locals.token),
+    },
         });
 
-        console.log(`API Response Status: ${response.status} ${response.statusText}`);
+        // console.log(`API Response Status: ${response.status} ${response.statusText}`);
         const responseText = await response.text();
         console.log(`API Response Text (first 500 chars): ${responseText.substring(0, 500)}`);
 
@@ -45,6 +49,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
         const buffer = Buffer.from(base64String, 'base64');
         const contentType = data.metadata?.contentType || 'image/png';
 
+        console.log(`Returning image with content type: ${contentType} and size: ${buffer.length} bytes`);
         return new Response(buffer, {
             headers: {
                 'Content-Type': contentType,

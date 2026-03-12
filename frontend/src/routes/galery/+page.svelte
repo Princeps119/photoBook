@@ -1,64 +1,118 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { api } from '../../apis/api';
+	import LoadingSpinner from '$lib/components/ui/common/Loading-Spinner.svelte';
+	import Pagination from '$lib/components/ui/common/pagination.svelte';
+	import PhotoCard from '$lib/components/ui/common/photo-card.svelte';
+	import PhotoViewCard from '$lib/components/ui/common/PhotoView-Card.svelte';
+	import type { PhotoData } from '$lib/types/types.js';
 
-   let { data } = $props();
-   let photos = $derived(data.photos || []);
+	let { data } = $props();
+	let photos = $derived(data.photos || []);
+	let isPublic: boolean = $state(false);
 
-   
-//    onMount(async() => {
-//     console.log('onMount called, fetching photos...', photos);
-//     try {
-//             // for (const photo of photos) {
-//             //     console.log(`Fetching data for photo ID: ${photo.hexStringId}`);
-//             //     const photoData = await api.Photos.get(photo.hexStringId);
-//             //     console.log(`Photo Data for ID ${photo.hexStringId}:`, photoData);
-//             // }
-//             const photoData = await api.Photos.get('698ddae0db2a9d6f50a6ccd9');
-//             console.log('Photo Data for ID 698ddae0db2a9d6f50a6ccd9:', photoData);
+	const PHOTOS_PER_PAGE = 8;
+	let currentPage = $state(1);
+	let isLoading = $state(false);
 
-           
-           
-           
-            
-//         } catch (error) {
-//            console.error('Error fetching photos:', error);
-//         } finally {
-//             console.log('Finished fetching photos');
-//         }
-//     console.log('Data from server:', data);
-//     console.log('Photos from server:', data.photos);
-//    });
+	let totalPages = $derived(Math.ceil(photos.length / PHOTOS_PER_PAGE));
+	let paginatedPhotos: PhotoData[] = $derived(
+		photos.slice((currentPage - 1) * PHOTOS_PER_PAGE, currentPage * PHOTOS_PER_PAGE)
+	);
 
-//    console.log('Photos:', photos);
+	function handlePageChange(page: number) {
+		isLoading = true;
+		currentPage = page;
+		setTimeout(() => {
+			isLoading = false;
+		}, 300);
+	}
 
-async function handleClick() {
-    try {
-        const photoidresponse = await fetch('http://localhost:8080/api/image/allforuser', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                // This might fail in the browser if token is only in HttpOnly cookies
-                // But this is just for manual testing in the UI
-            }
-        });
-        console.log('Manual fetch status:', photoidresponse.status);
-    } catch (error) {
-        console.error('Error fetching photo:', error);
-    }
-}
+	/* 	async function handleClick() {
+		try {
+			const photoidresponse = await fetch('http://localhost:8080/api/image/allforuser', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			console.log('Manual fetch status:', photoidresponse.status);
+		} catch (error) {
+			console.error('Error fetching photo:', error);
+		}
+	} */
 </script>
+
 <main>
-    <div>
-        <span>{photos.length} Photos</span>
-        {#each photos as photo}
-            <div>
-                <h2>{photo.filename}</h2>
-                <img src="/api/photos/{photo.hexStringId}" alt={photo.filename} style="max-width: 300px;" />
-            </div>
-        {/each}
-    </div>
-    <div>
-        <button onclick={handleClick}>Fetch Photo Data</button>
-    </div>
+	<div class="header">
+		<h1>Meine Bilder:</h1>
+		<span>{photos.length} {photos.length === 1 ? 'Bild' : 'Bilder'}</span>
+		<!-- <button class="fetch-btn" onclick={handleClick}>Fetch Photo Data</button> -->
+	</div>
+
+	<div class="content">
+		{#if isLoading}
+			<LoadingSpinner />
+		{:else}
+			<div class="grid" class:loading={isLoading}>
+				{#each paginatedPhotos as photo}
+					<PhotoCard
+						src={`/api/photos/${photo.hexStringId}?tag=${photo.metadata.tag}`}
+						alt={photo.filename}
+						title={photo.filename}
+						description={photo.metadata.tag}
+					/>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
+	<Pagination {currentPage} {totalPages} onPageChange={handlePageChange} />
 </main>
+
+<style>
+	main {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 2rem 1rem;
+	}
+
+	.header {
+		display: flex;
+        flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 2rem;
+	}
+
+	.fetch-btn {
+		background: #0070f3;
+		color: #fff;
+		border: none;
+		padding: 0.7rem 1.5rem;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 1rem;
+		transition: background 0.2s;
+	}
+
+	.fetch-btn:hover {
+		background: #005bb5;
+	}
+
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+		gap: 2rem;
+		margin-bottom: 2rem;
+		opacity: 1;
+		transition: opacity 0.2s;
+	}
+
+	.grid.loading {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	.content {
+		min-height: 600px;
+	}
+</style>

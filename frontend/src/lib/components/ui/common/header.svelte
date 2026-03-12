@@ -8,6 +8,8 @@
             <li><a href="/">Home</a></li>
             <li><a href="/register">Register</a></li>
             <li><a href="/login">Login</a></li>
+            <li><a href="/galery">Galery</a></li>
+            <li><a href="/upload">Upload</a></li>
         </ul>
     </div>
 </nav>

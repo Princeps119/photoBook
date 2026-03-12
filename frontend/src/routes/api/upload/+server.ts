@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     // }
 
     const buffer = await file.arrayBuffer();
-    // const base64Data = Buffer.from(buffer).toString('base64');
+    const base64Data = Buffer.from(buffer).toString('base64');
     const base64Mock = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
 
     const body = {
@@ -37,7 +37,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         tag: type,
       },
       image: {
-        base64: base64Mock,
+        base64: base64Data,
       }
     };
 
