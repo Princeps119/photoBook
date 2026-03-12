@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import LoadingSpinner from '$lib/components/ui/common/Loading-Spinner.svelte';
 	import Pagination from '$lib/components/ui/common/pagination.svelte';
 	import PhotoCard from '$lib/components/ui/common/photo-card.svelte';
+	import PhotoModal from '$lib/components/ui/common/Photo-Modal.svelte';
 	import PhotoViewCard from '$lib/components/ui/common/PhotoView-Card.svelte';
 	import type { PhotoData } from '$lib/types/types.js';
 
@@ -39,7 +41,34 @@
 			console.error('Error fetching photo:', error);
 		}
 	} */
+
+let photoUrl = $state('');
+let isModalOpen = $state(false);
+function openPhotoModal(photo: PhotoData) {
+    photoUrl = `/api/photos/load/${photo.hexStringId}?tag=${photo.metadata.tag}`;
+    isModalOpen = true;
+}
+async function deletePhoto(photo: PhotoData) {
+	try {
+		const response = await fetch(`/api/photos/delete/${photo.hexStringId}`, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		if (response.ok) {
+			console.log('Photo deleted successfully');
+			invalidateAll();
+			// Optionally, you can refresh the photo list here
+		} else {
+			console.error('Failed to delete photo');
+		}
+	} catch (error) {
+		console.error('Error deleting photo:', error);
+	}
+}
 </script>
+<PhotoModal bind:isOpen={isModalOpen} imageSrc={photoUrl} imageAlt="Photo Modal" />
 
 <main>
 	<div class="header">
@@ -55,10 +84,15 @@
 			<div class="grid" class:loading={isLoading}>
 				{#each paginatedPhotos as photo}
 					<PhotoCard
-						src={`/api/photos/${photo.hexStringId}?tag=${photo.metadata.tag}`}
+						src={`/api/photos/load/${photo.hexStringId}?tag=${photo.metadata.tag}`}
 						alt={photo.filename}
 						title={photo.filename}
 						description={photo.metadata.tag}
+                        onClick={() => openPhotoModal(photo)}
+						onDelete={() => 
+							deletePhoto(photo)
+						}
+						canDelete={true}
 					/>
 				{/each}
 			</div>

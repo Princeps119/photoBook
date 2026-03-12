@@ -2,6 +2,7 @@
 	import LoadingSpinner from '$lib/components/ui/common/Loading-Spinner.svelte';
 	import Pagination from '$lib/components/ui/common/pagination.svelte';
 	import PhotoCard from '$lib/components/ui/common/photo-card.svelte';
+	import PhotoModal from '$lib/components/ui/common/Photo-Modal.svelte';
 	import type { PhotoData } from '$lib/types/types.js';
 
 	let { data } = $props();
@@ -38,7 +39,15 @@
 			console.error('Error fetching photo:', error);
 		}
 	} */
+
+let photoUrl = $state('');
+let isModalOpen = $state(false);
+function openPhotoModal(photo: PhotoData) {
+    photoUrl = `/api/photos/load/${photo.hexStringId}?tag=${photo.metadata.tag}`;
+    isModalOpen = true;
+}
 </script>
+<PhotoModal bind:isOpen={isModalOpen} imageSrc={photoUrl} imageAlt="Photo Modal" />
 
 <main>
 	<div class="header">
@@ -54,10 +63,11 @@
 			<div class="grid" class:loading={isLoading}>
 				{#each paginatedPhotos as photo}
 					<PhotoCard
-						src={`/api/photos/${photo.hexStringId}?tag=Public`}
+						src={`/api/photos/load/${photo.hexStringId}?tag=Public`}
 						alt={photo.filename}
 						title={photo.filename}
 						description={photo.metadata.tag}
+						onClick={() => openPhotoModal(photo)}
 					/>
 				{/each}
 			</div>
