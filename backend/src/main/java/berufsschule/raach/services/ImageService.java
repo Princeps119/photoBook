@@ -1,6 +1,10 @@
 package berufsschule.raach.services;
 
-import berufsschule.raach.data.imageData.*;
+import berufsschule.raach.data.imageData.ImageArrayData;
+import berufsschule.raach.data.imageData.ImageSummaryData;
+import berufsschule.raach.data.imageData.ImageTag;
+import berufsschule.raach.data.imageData.ImageUploadData;
+import berufsschule.raach.data.imageData.ImageWithIDData;
 import berufsschule.raach.exeptions.DBSaveException;
 import berufsschule.raach.exeptions.DbSearchException;
 import berufsschule.raach.repo.MongoRepo;
@@ -130,6 +134,22 @@ public class ImageService {
             return true;
         }
         return false;
+    }
+
+    public void deleteAllImages(HttpExchange exchange) {
+        if (BUCKET == null) {
+            logger.log(Level.SEVERE, "Bucket not initialized");
+            return;
+        }
+
+        final List<ObjectId> imageIDs = checkUserAuthAndGetImageIds(exchange);
+
+        if (imageIDs != null && !imageIDs.isEmpty()) {
+            for (ObjectId id : imageIDs) {
+                BUCKET.delete(id);
+            }
+            logger.log(Level.INFO, "Deleted {0} images for user", imageIDs.size());
+        }
     }
 
     public List<ImageSummaryData> findAllImages() {
