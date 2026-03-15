@@ -43,5 +43,4 @@
 
 <Header logout={logout} bind:isAuthorized={isLoggedIn} username={username} />
 
-
 {@render children()}

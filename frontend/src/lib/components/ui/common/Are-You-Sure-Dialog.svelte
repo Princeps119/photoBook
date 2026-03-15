@@ -130,7 +130,7 @@
     cursor: pointer;
     transition: all 0.2s;
     background-color: #F59E0B;
-    color: white;
+    color: #1E293B;
   }
 
   .btn-danger:hover {

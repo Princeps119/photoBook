@@ -42,39 +42,40 @@
 		}
 	} */
 
-let photoUrl = $state('');
-let isModalOpen = $state(false);
-function openPhotoModal(photo: PhotoData) {
-    photoUrl = `/api/photos/load/${photo.hexStringId}?tag=${photo.metadata.tag}`;
-    isModalOpen = true;
-}
-async function deletePhoto(photo: PhotoData) {
-	try {
-		const response = await fetch(`/api/photos/delete/${photo.hexStringId}`, {
-			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-		if (response.ok) {
-			console.log('Photo deleted successfully');
-			invalidateAll();
-			// Optionally, you can refresh the photo list here
-		} else {
-			console.error('Failed to delete photo');
-		}
-	} catch (error) {
-		console.error('Error deleting photo:', error);
+	let photoUrl = $state('');
+	let isModalOpen = $state(false);
+	function openPhotoModal(photo: PhotoData) {
+		photoUrl = `/api/photos/load/${photo.hexStringId}?tag=${photo.metadata.tag}`;
+		isModalOpen = true;
 	}
-}
+	async function deletePhoto(photo: PhotoData) {
+		try {
+			const response = await fetch(`/api/photos/delete/${photo.hexStringId}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			if (response.ok) {
+				console.log('Photo deleted successfully');
+				invalidateAll();
+				// Optionally, you can refresh the photo list here
+			} else {
+				console.error('Failed to delete photo');
+			}
+		} catch (error) {
+			console.error('Error deleting photo:', error);
+		}
+	}
 </script>
+
 <PhotoModal bind:isOpen={isModalOpen} imageSrc={photoUrl} imageAlt="Photo Modal" />
 
 <main>
 	<div class="">
-		<div class="header">	
-		<h1>Meine Bilder</h1>
-		<h1>{photos.length} {photos.length === 1 ? 'Bild' : 'Bilder'}</h1>
+		<div class="header">
+			<h1>Meine Bilder</h1>
+			<h1>{photos.length} {photos.length === 1 ? 'Bild' : 'Bilder'}</h1>
 		</div>
 		<!-- <button class="fetch-btn" onclick={handleClick}>Fetch Photo Data</button> -->
 	</div>
@@ -82,6 +83,11 @@ async function deletePhoto(photo: PhotoData) {
 	<div class="content">
 		{#if isLoading}
 			<LoadingSpinner />
+		{:else if paginatedPhotos.length === 0}
+			<div class="no-content">
+				<p>Keine Bilder gefunden.</p>
+				<p>Füge Bilder hinzu, indem du auf <a id="uploadlink" href="/upload">"Hochladen"</a> klickst.</p>
+			</div>
 		{:else}
 			<div class="grid" class:loading={isLoading}>
 				{#each paginatedPhotos as photo}
@@ -90,10 +96,8 @@ async function deletePhoto(photo: PhotoData) {
 						alt={photo.filename}
 						title={photo.filename}
 						description={photo.metadata.tag}
-                        onClick={() => openPhotoModal(photo)}
-						onDelete={() => 
-							deletePhoto(photo)
-						}
+						onClick={() => openPhotoModal(photo)}
+						onDelete={() => deletePhoto(photo)}
 						canDelete={true}
 					/>
 				{/each}
@@ -113,7 +117,7 @@ async function deletePhoto(photo: PhotoData) {
 
 	.header {
 		display: flex;
-        flex-direction: row;
+		flex-direction: row;
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: 2rem;
@@ -141,5 +145,16 @@ async function deletePhoto(photo: PhotoData) {
 		font-size: 2rem;
 		margin-bottom: 10px;
 		color: white;
+	}
+
+	.no-content {
+		text-align: center;
+		color: white;
+		font-size: 1.2rem;
+	}
+
+	#uploadlink {
+		color: #F59E0B;
+		font-weight: 600;
 	}
 </style>

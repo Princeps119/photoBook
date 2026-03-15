@@ -60,6 +60,11 @@ function openPhotoModal(photo: PhotoData) {
 	<div class="content">
 		{#if isLoading}
 			<LoadingSpinner />
+		{:else if paginatedPhotos.length === 0}
+			<div class="no-content">
+				<p>Keine Bilder gefunden.</p>
+				<p>Füge Bilder hinzu, indem du auf <a id="uploadlink" href="/upload">"Hochladen"</a> klickst.</p>
+			</div>
 		{:else}
 			<div class="grid" class:loading={isLoading}>
 				{#each paginatedPhotos as photo}
@@ -115,5 +120,16 @@ function openPhotoModal(photo: PhotoData) {
 		font-size: 2rem;
 		margin-bottom: 10px;
 		color: white;
+	}
+
+	.no-content {
+		text-align: center;
+		color: white;
+		font-size: 1.2rem;
+	}
+
+	#uploadlink {
+		color: #F59E0B;
+		font-weight: 600;
 	}
 </style>

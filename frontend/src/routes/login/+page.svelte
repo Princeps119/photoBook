@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
     import { api } from "../../apis/api";
 
     let email: string = $state('');
@@ -21,7 +21,7 @@
                 if (response.username) {
                     localStorage.setItem('username', response.username);
                 }
-                goto('/');
+                goto('/', { invalidateAll: true });
             }
 
         } catch (err) {
