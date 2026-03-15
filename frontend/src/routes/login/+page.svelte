@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+	import { invalid } from '@sveltejs/kit';
     import { api } from "../../apis/api";
 
     let email: string = $state('');
@@ -26,7 +27,7 @@
                 if (response.username) {
                     localStorage.setItem('username', response.username);
                 }
-                 goto('/upload');
+                 goto('/');
                 
             }
 

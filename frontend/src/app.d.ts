@@ -12,6 +12,8 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			token: TokenData | null;
+			isAuthenticated: boolean;
+			username?: string;
 		}
 		// interface PageData {}
 		// interface PageState {}

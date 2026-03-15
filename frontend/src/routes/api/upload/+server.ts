@@ -8,9 +8,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     
     const file = formData.get('file') as File;
     const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
+    // const description = formData.get('description') as string;
     const type = formData.get('type') as 'Public' | 'Private';
-    const userEmail = formData.get('userEmail') as string;
+    // const userEmail = formData.get('userEmail') as string;
 
 
     // if (!file || !title || !userEmail) {

@@ -5,7 +5,6 @@
     message: string;
     confirmText?: string;
     cancelText?: string;
-    isDangerous?: boolean;
     onConfirm?: () => void;
     onCancel?: () => void;
   }
@@ -16,7 +15,6 @@
     message = '',
     confirmText = 'Bestätigen',
     cancelText = 'Abbrechen',
-    isDangerous = false,
     onConfirm,
     onCancel
   }: Props = $props();
@@ -53,13 +51,11 @@
       <p class="dialog-message">{message}</p>
 
       <div class="dialog-actions">
-        <button class="btn btn-secondary" onclick={handleCancel}>
+        <button class="btn-secondary" onclick={handleCancel}>
           {cancelText}
         </button>
         <button 
-          class="btn"
-          class:btn-danger={isDangerous}
-          class:btn-primary={!isDangerous}
+          class="btn-danger"
           onclick={handleConfirm}
         >
           {confirmText}
@@ -85,7 +81,7 @@
 
   .dialog-content {
     position: relative;
-    background-color: white;
+    background-color: #1E293B;
     border-radius: 8px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     padding: 32px;
@@ -125,7 +121,7 @@
     justify-content: flex-end;
   }
 
-  .btn {
+  .btn-danger {
     padding: 8px 16px;
     border: none;
     border-radius: 6px;
@@ -133,27 +129,22 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background-color: #3b82f6;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background-color: #2563eb;
-  }
-
-  .btn-danger {
-    background-color: #ef4444;
+    background-color: #F59E0B;
     color: white;
   }
 
   .btn-danger:hover {
-    background-color: #dc2626;
+    background-color: #f49b00;
   }
 
   .btn-secondary {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
     background-color: #e5e7eb;
     color: #1f2937;
   }

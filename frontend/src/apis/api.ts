@@ -41,17 +41,9 @@ export const api = {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('title', title);
-      formData.append('description', description);
+      // formData.append('description', description);
       formData.append('type', type);
-      formData.append('userEmail', userEmail);
-
-      console.log('API POST Request - FormData:', {
-        file,
-        title,
-        description,
-        type,
-        userEmail,
-      });
+      // formData.append('userEmail', userEmail);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -83,10 +75,10 @@ export const api = {
 
   Auth: {
     login: (mail: string, password: string) =>
-      request(`/api/login`, { method: 'POST', body: { mail, password } }),
+      request(`/api/auth/login`, { method: 'POST', body: { mail, password } }),
     register: (email: string, password: string) =>
-      request('/auth/register', { method: 'POST', body: { email, password } }),
+      request('/api/auth/register', { method: 'POST', body: { email, password } }),
     logout: () =>
-      request('/auth/logout', { method: 'POST' }),
+      request('/api/auth/logout', { method: 'POST' }),
   },
 };

@@ -15,6 +15,10 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
         return json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    
+
+    
+
     console.log(`GET request for photo ID: ${id}`);
     console.log(`Using token: ${JSON.stringify(locals.token)}`);
 

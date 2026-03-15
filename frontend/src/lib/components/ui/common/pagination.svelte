@@ -5,7 +5,7 @@
         onPageChange: (page: number) => void;
     }
 
-    let { currentPage, totalPages, onPageChange } = $props();
+    let { currentPage, totalPages, onPageChange }: Props = $props();
 
     function goToPage(page: number) {
         if (page >= 1 && page <= totalPages) {
@@ -26,8 +26,8 @@
     .pagination button {
         padding: 0.5rem 1rem;
         border: none;
-        background: #0070f3;
-        color: #fff;
+        background: #F59E0B;
+        color: #1E293B;
         border-radius: 5px;
         cursor: pointer;
         transition: background 0.2s;
@@ -35,17 +35,18 @@
     }
 
     .pagination button:hover:not(:disabled) {
-        background: #005bb5;
+        background: #F59E0B;
     }
 
     .pagination button:disabled {
-        background: #ccc;
+        background: #3c485b;
         cursor: not-allowed;
     }
 
     .pagination button.active {
-        background: #005bb5;
+        background: #F59E0B;
         font-weight: bold;
+        scale: 1.1;
     }
 </style>
 

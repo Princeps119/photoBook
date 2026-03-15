@@ -71,9 +71,11 @@ async function deletePhoto(photo: PhotoData) {
 <PhotoModal bind:isOpen={isModalOpen} imageSrc={photoUrl} imageAlt="Photo Modal" />
 
 <main>
-	<div class="header">
-		<h1>Meine Bilder:</h1>
-		<span>{photos.length} {photos.length === 1 ? 'Bild' : 'Bilder'}</span>
+	<div class="">
+		<div class="header">	
+		<h1>Meine Bilder</h1>
+		<h1>{photos.length} {photos.length === 1 ? 'Bild' : 'Bilder'}</h1>
+		</div>
 		<!-- <button class="fetch-btn" onclick={handleClick}>Fetch Photo Data</button> -->
 	</div>
 
@@ -117,21 +119,6 @@ async function deletePhoto(photo: PhotoData) {
 		margin-bottom: 2rem;
 	}
 
-	.fetch-btn {
-		background: #0070f3;
-		color: #fff;
-		border: none;
-		padding: 0.7rem 1.5rem;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 1rem;
-		transition: background 0.2s;
-	}
-
-	.fetch-btn:hover {
-		background: #005bb5;
-	}
-
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -148,5 +135,11 @@ async function deletePhoto(photo: PhotoData) {
 
 	.content {
 		min-height: 600px;
+	}
+
+	h1 {
+		font-size: 2rem;
+		margin-bottom: 10px;
+		color: white;
 	}
 </style>
