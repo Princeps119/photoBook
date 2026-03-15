@@ -2,7 +2,8 @@
 
 
 <script lang="ts">
-    
+	import { goto } from "$app/navigation";
+
     let username = '';
     let email = '';
     let password = '';
@@ -10,92 +11,131 @@
     let error = '';
     let loading = false;
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: Event) => {
+        e.preventDefault();
+        loading = true;
         error = '';
         
         if (!username || !email || !password || !confirmPassword) {
-            error = 'All fields are required';
+            error = 'Bitte fülle alle Felder aus';
             return;
         }
         
         if (password !== confirmPassword) {
-            error = 'Passwords do not match';
+            error = 'Passwörter stimmen nicht überein';
             return;
         }
         
         if (password.length < 6) {
-            error = 'Password must be at least 6 characters';
+            error = 'Das Passwort muss mindestens 6 Zeichen lang sein';
             return;
+        }
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                console.log('Registration successful:', data);
+                goto('/login');
+                // Optionally, you can redirect to the login page or home page here
+            } else {
+                error = data.message || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.';
+                console.error('Registration failed:', data);
+            }
+        } catch (err) {
+            error = err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';
+            console.error('Error during registration:', err);
+        } finally {
+            loading = false;
         }
     };
 </script>
 
-<main class="register-container">
+<main>
     <div class="register-box">
-        <h1>Create Account</h1>
+        <h1>Account erstellen</h1>
         
         {#if error}
             <div class="error-message">{error}</div>
         {/if}
         
-        <form on:submit|preventDefault={handleSubmit}>
+        <form onsubmit={(event) => handleSubmit(event)} autocomplete="off">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">Benutzername<span class="required">*</span></label>
                 <input
                     type="text"
                     id="username"
                     bind:value={username}
-                    placeholder="Choose a username"
+                    placeholder="Gib deinen Benutzernamen ein"
                     disabled={loading}
+                    autocomplete="off"
+                    required
                 />
             </div>
             
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">Email<span class="required">*</span></label>
                 <input
                     type="email"
                     id="email"
                     bind:value={email}
-                    placeholder="Enter your email"
+                    placeholder="Gib deine Email ein"
                     disabled={loading}
+                    autocomplete="off"
+                    required
                 />
             </div>
             
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Passwort<span class="required">*</span></label>
                 <input
                     type="password"
                     id="password"
                     bind:value={password}
-                    placeholder="Enter a password"
+                    placeholder="Gib dein Passwort ein"
                     disabled={loading}
+                    autocomplete="off"
+                    required
                 />
             </div>
             
             <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
+                <label for="confirmPassword">Passwort bestätigen<span class="required">*</span></label>
                 <input
                     type="password"
                     id="confirmPassword"
                     bind:value={confirmPassword}
-                    placeholder="Confirm your password"
+                    placeholder="Bestätige dein Passwort"
                     disabled={loading}
+                    autocomplete="off"
+                    required
                 />
             </div>
             
             <button type="submit" disabled={loading}>
-                {loading ? 'Registering...' : 'Register'}
+                {#if loading}
+                    Registrieren...
+                {:else}
+                    Registrieren
+                {/if}
             </button>
         </form>
         
         <p class="login-link">
-            Already have an account? <a href="/login">Login here</a>
+            Schon einen Account? <a href="/login">zum Login</a>
         </p>
     </div>
 </main>
 
 <style>
-    main.register-container {
+    main {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -104,7 +144,7 @@
     }
 
     .register-box {
-        background: white;
+        background: #F59E0B;
         padding: 40px;
         border-radius: 8px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -114,7 +154,7 @@
 
     h1 {
         text-align: center;
-        color: #333;
+        color: #1E293B;
         margin-top: 0;
         margin-bottom: 30px;
         font-size: 28px;
@@ -137,7 +177,7 @@
     }
 
     label {
-        color: #333;
+        color: #1E293B;
         font-weight: 500;
         margin-bottom: 8px;
         font-size: 14px;
@@ -145,39 +185,33 @@
 
     input {
         padding: 12px;
-        border: 1px solid #ddd;
         border-radius: 4px;
         font-size: 14px;
-        transition: border-color 0.3s;
+        background-color: #1E293B;
+        color: white;
     }
 
     input:focus {
         outline: none;
-        border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    input:disabled {
-        background-color: #f5f5f5;
-        cursor: not-allowed;
     }
 
     button {
         width: 100%;
         padding: 12px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #1E293B;
         color: white;
         border: none;
         border-radius: 4px;
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
-        transition: opacity 0.3s;
+        transition: 0.3s;
         margin-top: 10px;
     }
 
     button:hover:not(:disabled) {
-        opacity: 0.9;
+        transform: translateY(-2px);
     }
 
     button:disabled {
@@ -193,13 +227,18 @@
     }
 
     .login-link a {
-        color: #667eea;
+        color: #1E293B;
         text-decoration: none;
         font-weight: 600;
     }
 
     .login-link a:hover {
         text-decoration: underline;
+    }
+
+    .required {
+        color: red;
+        margin-left: 4px;
     }
 </style>
 

@@ -300,7 +300,6 @@
 	.file-input {
         width: 100%;
         padding: 8px 10px;
-        border: 1px solid #e5e7eb;
         border-radius: 6px;
         font-family: inherit;
         font-size: 0.95rem;
@@ -321,7 +320,6 @@
 
 	.file-input:focus {
         outline: none;
-        border-color: white;
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 	/* .file-textarea:focus {
@@ -329,12 +327,6 @@
 		border-color: white;
 		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 	} */
-
-	.file-input:disabled {
-        background-color: #f9fafb;
-        color: #9ca3af;
-        cursor: not-allowed;
-    }
 	/* .file-textarea:disabled {
 		background-color: #f9fafb;
 		color: #9ca3af;
@@ -391,7 +383,7 @@
 
 	.add-more-btn {
 		background-color: #F59E0B;
-		color: white;
+		color: #1E293B;
 	}
 
 	.add-more-btn:hover:not(:disabled) {
@@ -400,7 +392,7 @@
 
 	.upload-btn {
 		background-color: #F59E0B;
-		color: white;
+		color: #1E293B;
 		flex: 1;
 	}
 

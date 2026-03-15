@@ -1,6 +1,5 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-	import { invalid } from '@sveltejs/kit';
     import { api } from "../../apis/api";
 
     let email: string = $state('');
@@ -14,26 +13,19 @@
         isLoading = true;
 
         try {
-            const response= await api.Auth.login(email, password);
-            
-            // Store the token in localStorage or a cookie
-            // if (response.token) {
-            //     localStorage.setItem('authToken', response.token);
-            //     localStorage.setItem('userEmail', email);
-            // }
+            const response = await api.Auth.login(email, password);
+
             console.log('Login Response:', response);
 
-            if (response.success == true) {
+            if (response.success === true) {
                 if (response.username) {
                     localStorage.setItem('username', response.username);
                 }
-                 goto('/');
-                
+                goto('/');
             }
 
         } catch (err) {
             error = err instanceof Error ? err.message : 'Login failed. Please try again.';
-            console.error('Login error:', err);
         } finally {
             isLoading = false;
         }
@@ -44,128 +36,160 @@
     }
 </script>
 
-<div class="flex min-h-screen items-center justify-center px-4">
-    <div class="w-full max-w-md">
-        <!-- Login Card -->
-        <div class="rounded-lg bg-white shadow-2xl">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8">
-                <h1 class="text-3xl font-bold text-white">Login</h1>
-                <p class="mt-2 text-blue-100">Welcome to the PhotoBook</p>
+<main>
+    <div class="login-box">
+
+        <h1>Login</h1>
+
+        {#if error}
+            <div class="error-message">{error}</div>
+        {/if}
+
+        <form onsubmit={handleLogin} autocomplete="off">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    bind:value={email}
+                    placeholder="Gib deine Email ein"
+                    disabled={isLoading}
+                    required
+                />
             </div>
 
-            <!-- Form Content -->
-            <div class="p-6">
-                <!-- Error Message -->
-                {#if error}
-                    <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800">
-                        <p class="font-semibold">Login Failed</p>
-                        <p>{error}</p>
-                    </div>
+            <div class="form-group">
+                <label for="password">Passwort</label>
+                <input
+                    type="password"
+                    id="password"
+                    bind:value={password}
+                    placeholder="Gib dein Passwort ein"
+                    disabled={isLoading}
+                    required
+                />
+            </div>
+
+            <button type="submit" disabled={isLoading || !email || !password}>
+                {#if isLoading}
+                    Einloggen...
+                {:else}
+                    Login
                 {/if}
+            </button>
 
-                <!-- Login Form -->
-                <form onsubmit={handleLogin} class="space-y-4">
-                    <!-- Email Field -->
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700">
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            bind:value={email}
-                            placeholder="you@example.com"
-                            disabled={isLoading}
-                            class="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
-                        />
-                    </div>
+        </form>
 
-                    <!-- Password Field -->
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                            bind:value={password}
-                            placeholder="••••••••"
-                            disabled={isLoading}
-                            class="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
-                        />
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button
-                        type="submit"
-                        disabled={isLoading || !email || !password}
-                        class="mt-6 w-full rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-2 font-semibold text-white transition hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {#if isLoading}
-                            <span class="flex items-center justify-center">
-                                <svg
-                                    class="mr-2 h-4 w-4 animate-spin"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        class="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        stroke-width="4"
-                                    ></circle>
-                                    <path
-                                        class="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                </svg>
-                                Logging in...
-                            </span>
-                        {:else}
-                            Login
-                        {/if}
-                    </button>
-                </form>
-
-                <!-- Divider -->
-                <div class="my-6 flex items-center">
-                    <div class="flex-1 border-t border-gray-300"></div>
-                    <span class="px-3 text-sm text-gray-600">Or</span>
-                    <div class="flex-1 border-t border-gray-300"></div>
-                </div>
-
-                <!-- Register Link -->
-                <button
-                    type="button"
-                    onclick={navigateToRegister}
-                    class="w-full rounded-lg border-2 border-blue-600 py-2 font-semibold text-blue-600 transition hover:bg-blue-50"
-                >
-                    Create a new account
-                </button>
-            </div>
-
-            <!-- Footer -->
-            <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 text-center text-xs text-gray-600">
-                <p>Don't have an account? <span class="cursor-pointer font-semibold text-blue-600">Sign up here</span></p>
-            </div>
-        </div>
-
-        <!-- Help Text -->
-        <p class="mt-4 text-center text-sm text-gray-300">
-            Need help? Contact support@photobook.com
+        <p class="register-link">
+            Noch keinen Account? 
+            <a href="/register">Registrieren</a>
         </p>
+
     </div>
-</div>
+</main>
 
 <style>
-    /* Add any additional custom styles here */
+
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-box {
+    background: #F59E0B;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+h1 {
+    text-align: center;
+    color: #1E293B;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.error-message {
+    background-color: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 1px solid #fcc;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    color: #1E293B;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+input {
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #1E293B;
+    color: white;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30,41,59,0.2);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #1E293B;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.register-link a {
+    color: #1E293B;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
 </style>

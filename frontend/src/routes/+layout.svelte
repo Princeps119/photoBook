@@ -2,7 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
-	import Header from '$lib/components/ui/common/header.svelte';
+	import Header from '$lib/components/ui/common/Nav-Header.svelte';
 
 	let { children, data } = $props();
 	let pagename = page.url.pathname;

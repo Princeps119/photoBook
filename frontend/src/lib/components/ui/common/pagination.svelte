@@ -30,7 +30,6 @@
         color: #1E293B;
         border-radius: 5px;
         cursor: pointer;
-        transition: background 0.2s;
         font-size: 0.95rem;
     }
 

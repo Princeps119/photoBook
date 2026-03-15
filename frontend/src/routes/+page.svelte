@@ -1,8 +1,9 @@
 <script lang="ts">
 	import LoadingSpinner from '$lib/components/ui/common/Loading-Spinner.svelte';
-	import Pagination from '$lib/components/ui/common/pagination.svelte';
-	import PhotoCard from '$lib/components/ui/common/photo-card.svelte';
+	import Pagination from '$lib/components/ui/common/Pagination.svelte';
+
 	import PhotoModal from '$lib/components/ui/common/Photo-Modal.svelte';
+	import PhotoPreviewCard from '$lib/components/ui/common/Photo-Preview-Card.svelte';
 	import type { PhotoData } from '$lib/types/types.js';
 
 	let { data } = $props();
@@ -62,7 +63,7 @@ function openPhotoModal(photo: PhotoData) {
 		{:else}
 			<div class="grid" class:loading={isLoading}>
 				{#each paginatedPhotos as photo}
-					<PhotoCard
+					<PhotoPreviewCard
 						src={`/api/photos/load/${photo.hexStringId}?tag=Public&type=Public`}
 						alt={photo.filename}
 						title={photo.filename}
