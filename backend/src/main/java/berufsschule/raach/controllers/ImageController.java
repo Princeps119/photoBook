@@ -14,7 +14,12 @@ import org.bson.types.ObjectId;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,9 +36,10 @@ public class ImageController {
     private static final String API_ENDPOINT_ALL_FOR_USER = "allforuser";
     private static final String API_ENDPOINT_DELETE = "delete";
     private static final String API_ENDPOINT_ALL_PUBLIC = "allpublic";
+    private static final String API_ENDPOINT_GET_ALL_PUBLIC = "getallpublic";
 
     private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + API_ENDPOINT_SAVE, API_PREFIX + API_ENDPOINT_FIND_ID, API_PREFIX + API_ENDPOINT_ALL_FOR_USER,
-            API_PREFIX + API_ENDPOINT_DELETE, API_PREFIX + API_ENDPOINT_ALL_PUBLIC));
+            API_PREFIX + API_ENDPOINT_DELETE, API_PREFIX + API_ENDPOINT_ALL_PUBLIC, API_PREFIX + API_ENDPOINT_GET_ALL_PUBLIC));
 
     private static final String USER_COLLECTION_NAME = "users";
     private static final MongoRepo userDB = MongoRepo.getInstance();
@@ -85,6 +91,8 @@ public class ImageController {
                     return delete(method, exchange);
                 case 4:
                     return findAllImagesForPublic(exchange);
+                case 5:
+                    return findPublicImageById(method, exchange);
             }
         }
         throw new IllegalArgumentException("Invalid path");
@@ -190,16 +198,7 @@ public class ImageController {
                     final Optional<ImageWithIDData> foundImageOpt = imageService.findImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
 
                     if (foundImageOpt.isPresent()) {
-                        final byte[] bytes = createByteArray(foundImageOpt.get());
-
-                        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-                        exchange.sendResponseHeaders(200, bytes.length);
-
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            os.write(bytes);
-                        }
-                        String timestamp = new Date().toString();
-                        logger.log(Level.INFO, "sent image timestamp: " + timestamp);
+                        handleFoundImage(exchange, foundImageOpt.get());
                         return true;
                     }
                 }
@@ -212,6 +211,48 @@ public class ImageController {
             }
         }
         return false;
+    }
+
+    private static Boolean findPublicImageById(String method, HttpExchange exchange) {
+        if (method.equals(GET)) {
+            try {
+                final ImageService imageService = ImageService.getInstance();
+
+                final Map<String, String> queryMap = getQueryToMap(exchange.getRequestURI().getQuery());
+
+                if (!queryMap.containsKey("id") && !queryMap.containsKey("tag") && !queryMap.get("tag").equals(ImageTag.Public.toString())) {
+                    sendErrorResponse(exchange, 400, "Invalid payload: id or tag are required");
+                }
+
+                final ObjectId id = new ObjectId(queryMap.get("id"));
+                final Optional<ImageWithIDData> foundImageOpt = imageService.findPublicImageWithIdAndTag(id, ImageTag.valueOf(queryMap.get("tag")));
+
+                if (foundImageOpt.isPresent()) {
+                    handleFoundImage(exchange, foundImageOpt.get());
+                    return true;
+                }
+            } catch (DbSearchException e) {
+                sendErrorResponse(exchange, 500, "Image not found");
+            } catch (IllegalArgumentException e) {
+                sendErrorResponse(exchange, 400, "Invalid username or password");
+            } catch (IOException e) {
+                sendErrorResponse(exchange, 500, "Internal server error");
+            }
+        }
+        return false;
+    }
+
+    private static void handleFoundImage(HttpExchange exchange, ImageWithIDData foundImage) throws IOException {
+        final byte[] bytes = createByteArray(foundImage);
+
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+        exchange.sendResponseHeaders(200, bytes.length);
+
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
+        String timestamp = new Date().toString();
+        logger.log(Level.INFO, "sent image timestamp: " + timestamp);
     }
 
     private static Boolean delete(String method, HttpExchange exchange) {

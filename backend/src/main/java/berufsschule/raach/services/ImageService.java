@@ -113,6 +113,23 @@ public class ImageService {
         } else throw new DbSearchException("could not find an Image");
     }
 
+    public Optional<ImageWithIDData> findPublicImageWithIdAndTag(ObjectId id, ImageTag tag) throws DbSearchException {
+
+        final Optional<GridFSFile> imageFileOpt = getImageWithIdAndTag(id, tag);
+        if (imageFileOpt.isPresent()) {
+            if (id == null || tag == null) {
+                return Optional.empty();
+            }
+            final GridFSFile file = imageFileOpt.get();
+           if (null != file.getMetadata() && file.getMetadata().get("tag").equals(ImageTag.Public.toString())) {
+               return Optional.ofNullable(buildImageWithData(file));
+           } else {
+               return Optional.empty();
+           }
+
+        } else throw new DbSearchException("could not find an Image");
+    }
+
     public boolean deleteById(HttpExchange exchange) throws DbSearchException {
         if (BUCKET == null) {
             logger.log(Level.SEVERE, "Bucket not initialized");
