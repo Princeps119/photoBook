@@ -4,5 +4,8 @@ public class DBSaveException extends RuntimeException {
     public DBSaveException(String message, Exception e) {
         super(message, e);
     }
+    public DBSaveException(String message) {
+        super(message);
+    }
 
 }
