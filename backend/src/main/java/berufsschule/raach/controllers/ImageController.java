@@ -23,8 +23,17 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static berufsschule.raach.controllers.MainController.*;
-import static berufsschule.raach.services.Util.*;
+import static berufsschule.raach.controllers.MainController.CONTENT_TYPE;
+import static berufsschule.raach.controllers.MainController.CONTENT_TYPE_JSON;
+import static berufsschule.raach.controllers.MainController.DELETE;
+import static berufsschule.raach.controllers.MainController.GET;
+import static berufsschule.raach.controllers.MainController.POST;
+import static berufsschule.raach.services.Util.checkLoginToken;
+import static berufsschule.raach.services.Util.checkPathImage;
+import static berufsschule.raach.services.Util.createByteArray;
+import static berufsschule.raach.services.Util.getQueryToMap;
+import static berufsschule.raach.services.Util.readJSON;
+import static berufsschule.raach.services.Util.sendErrorResponse;
 
 public class ImageController {
 
@@ -36,7 +45,7 @@ public class ImageController {
     private static final String API_ENDPOINT_ALL_FOR_USER = "allforuser";
     private static final String API_ENDPOINT_DELETE = "delete";
     private static final String API_ENDPOINT_ALL_PUBLIC = "allpublic";
-    private static final String API_ENDPOINT_GET_ALL_PUBLIC = "getallpublic";
+    private static final String API_ENDPOINT_GET_ALL_PUBLIC = "getpublicimage";
 
     private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + API_ENDPOINT_SAVE, API_PREFIX + API_ENDPOINT_FIND_ID, API_PREFIX + API_ENDPOINT_ALL_FOR_USER,
             API_PREFIX + API_ENDPOINT_DELETE, API_PREFIX + API_ENDPOINT_ALL_PUBLIC, API_PREFIX + API_ENDPOINT_GET_ALL_PUBLIC));
