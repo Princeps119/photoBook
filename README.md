@@ -90,6 +90,8 @@ Alle bildbezogenen Endpunkte erfordern Authentifizierung (außer `allpublic`) un
     *   Gibt eine Liste aller Bilder des authentifizierten Benutzers zurück.
 *   **Öffentliche Bilder abrufen** (`GET /api/image/allpublic`)
     *   Gibt alle als "Public" markierten Bilder zurück (keine Auth erforderlich).
+*   **Öffentliches Bild abrufen** (`GET /api/image/getpublicimage?id={id}&tag=Public`)
+    *   Ruft ein öffentliches Bild anhand seiner ID ab (keine Auth erforderlich).
 *   **Bild löschen** (`DELETE /api/image/delete/{id}`)
     *   Löscht das Bild mit der angegebenen ID.
 
