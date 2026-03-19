@@ -148,6 +148,9 @@ public class ImageController {
             } catch (IllegalArgumentException e) {
                 sendErrorResponse(exchange, 400, "Invalid username or password");
             }
+            finally {
+                exchange.close();
+            }
         }
         return false;
     }
@@ -204,6 +207,7 @@ public class ImageController {
                         handleFoundImage(exchange, foundImageOpt.get());
                         return true;
                     }
+                    exchange.close();
                 }
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
@@ -234,6 +238,7 @@ public class ImageController {
                     handleFoundImage(exchange, foundImageOpt.get());
                     return true;
                 }
+                exchange.close();
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
             } catch (IllegalArgumentException e) {
@@ -268,6 +273,9 @@ public class ImageController {
                 return didDelete;
             } catch (IOException e) {
                 sendErrorResponse(exchange, 500, "Error deleting user");
+            }
+            finally {
+                exchange.close();
             }
         }
         return false;

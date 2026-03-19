@@ -18,7 +18,7 @@ import static berufsschule.raach.services.Util.logger;
 public class MainController {
 
     public static Optional<Boolean> processRequest(final HttpExchange exchange) {
-        try {
+        try (exchange) {
 
             final String method = exchange.getRequestMethod();
 
