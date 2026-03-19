@@ -14,14 +14,23 @@ import com.mongodb.client.model.Filters;
 import com.sun.net.httpserver.HttpExchange;
 import org.bson.Document;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -109,6 +118,9 @@ public class Util {
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Failed to send error response", e);
+        }
+        finally {
+            exchange.close();
         }
     }
 
