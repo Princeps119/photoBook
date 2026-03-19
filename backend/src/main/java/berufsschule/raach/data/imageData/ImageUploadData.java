@@ -20,7 +20,7 @@ import org.bson.Document;
                         "uploadDate": "2026-02-05T17:40:00Z" -optional-
                         },<p>
                 "image": {
-                              "byteArray":"iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                              "base64":"iVBORw0KGgoAAAANSUhEUgAAAAUA"
                 }
         }
  </p>

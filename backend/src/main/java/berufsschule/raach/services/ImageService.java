@@ -1,5 +1,6 @@
 package berufsschule.raach.services;
 
+import berufsschule.raach.data.imageData.ImageArrayData;
 import berufsschule.raach.data.imageData.ImageSummaryData;
 import berufsschule.raach.data.imageData.ImageTag;
 import berufsschule.raach.data.imageData.ImageUploadData;
@@ -71,6 +72,13 @@ public class ImageService {
         GridFSUploadOptions options = new GridFSUploadOptions().metadata(uploadData.metadata());
 
         byte[] imageBytes = Base64.getDecoder().decode(uploadData.image().base64());
+        final long maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
+
+        if (imageBytes.length > maxSizeInBytes) {
+            logger.log(Level.WARNING, "Image is too large, max size is 10 MB");
+
+            throw new DBSaveException("Image is too large, max size is 10 MB");
+        }
 
         // Convert bytes to InputStream
         try (InputStream is = new java.io.ByteArrayInputStream(imageBytes)) {
@@ -105,6 +113,23 @@ public class ImageService {
         } else throw new DbSearchException("could not find an Image");
     }
 
+    public Optional<ImageWithIDData> findPublicImageWithIdAndTag(ObjectId id, ImageTag tag) throws DbSearchException {
+
+        final Optional<GridFSFile> imageFileOpt = getImageWithIdAndTag(id, tag);
+        if (imageFileOpt.isPresent()) {
+            if (id == null || tag == null) {
+                return Optional.empty();
+            }
+            final GridFSFile file = imageFileOpt.get();
+           if (null != file.getMetadata() && file.getMetadata().get("tag").equals(ImageTag.Public.toString())) {
+               return Optional.ofNullable(buildImageWithData(file));
+           } else {
+               return Optional.empty();
+           }
+
+        } else throw new DbSearchException("could not find an Image");
+    }
+
     public boolean deleteById(HttpExchange exchange) throws DbSearchException {
         if (BUCKET == null) {
             logger.log(Level.SEVERE, "Bucket not initialized");
@@ -126,6 +151,22 @@ public class ImageService {
             return true;
         }
         return false;
+    }
+
+    public void deleteAllImages(HttpExchange exchange) {
+        if (BUCKET == null) {
+            logger.log(Level.SEVERE, "Bucket not initialized");
+            return;
+        }
+
+        final List<ObjectId> imageIDs = checkUserAuthAndGetImageIds(exchange);
+
+        if (imageIDs != null && !imageIDs.isEmpty()) {
+            for (ObjectId id : imageIDs) {
+                BUCKET.delete(id);
+            }
+            logger.log(Level.INFO, "Deleted {0} images for user", imageIDs.size());
+        }
     }
 
     public List<ImageSummaryData> findAllImages() {
@@ -185,7 +226,6 @@ public class ImageService {
                             eq("_id", id),
                             eq("metadata.tag", tag))
             ).first();
-
         }
 
         if (imageFile == null) {
@@ -210,7 +250,7 @@ public class ImageService {
                 file.getObjectId().toHexString(),
                 file.getFilename(),
                 file.getMetadata(), // Document
-                Base64.getEncoder().encodeToString(out.toByteArray())
+                new ImageArrayData(Base64.getEncoder().encodeToString(out.toByteArray()))
         );
     }
 
@@ -228,7 +268,7 @@ public class ImageService {
         return false;
     }
 
-    private Document  getUser(HttpExchange exchange) {
+    private Document getUser(HttpExchange exchange) {
         final String decryptedMail = checkLoginToken(exchange, userCollection);
         return userCollection.find(eq("mail", decryptedMail)).first();
     }
