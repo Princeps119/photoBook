@@ -7,8 +7,7 @@ import berufsschule.raach.exeptions.EncryptionException;
 import berufsschule.raach.services.DeletionService;
 import berufsschule.raach.services.LoginService;
 import berufsschule.raach.services.RegistrationService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import berufsschule.raach.services.Util;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -17,7 +16,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -169,9 +167,7 @@ public class UserController {
             }
 
             // Success - send token
-            final Gson gson = new GsonBuilder().create();
-            final String jsonResponse = gson.toJson(token);
-            final byte[] responseBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
+            final byte[] responseBytes = Util.createByteArray(token);
 
             exchange.getResponseHeaders().set(CONTENT_TYPE, "application/json");
             exchange.sendResponseHeaders(200, responseBytes.length);

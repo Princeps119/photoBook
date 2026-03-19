@@ -40,6 +40,7 @@ public class DeletionService {
             return false;
         }
 
+        ImageService.getInstance().deleteAllImages(exchange);
         userCollection.findOneAndDelete(Filters.eq("mail", decryptedMail));
         logger.log(Level.INFO, "Deleted user with mail {0}", decryptedMail);
         return true;
