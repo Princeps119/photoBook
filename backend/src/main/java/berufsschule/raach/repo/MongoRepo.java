@@ -78,7 +78,7 @@ public class MongoRepo {
         return instance;
     }
 
-    public MongoDatabase getImageDB() {
+    public synchronized MongoDatabase getImageDB() {
         if (imageDB == null) {
             System.err.println("imageDB not initialized.");
             return null;
@@ -89,12 +89,12 @@ public class MongoRepo {
 
         if (!exists) {
             imageDB.createCollection("images");
-            createExampleUser();
+            // Optionally create user here, but getUserDB already handles it
         }
         return imageDB;
     }
 
-    public MongoDatabase getUserDB() {
+    public synchronized MongoDatabase getUserDB() {
         if (userDB == null) {
             System.err.println("userDB not initialized.");
             return null;
@@ -109,23 +109,27 @@ public class MongoRepo {
             userDB.getCollection("users").createIndex(new Document("mail", 1), new IndexOptions().unique(true));
 
             createExampleUser();
-        }
-        if (userDB.getCollection("users").countDocuments() == 0) {
+        } else if (userDB.getCollection("users").countDocuments() == 0) {
             createExampleUser();
         }
         return userDB;
     }
 
-    private void createExampleUser() {
+    private synchronized void createExampleUser() {
+        String email = "example@mail.com";
+        MongoCollection<Document> users = userDB.getCollection("users");
+
+        // Check if user already exists to be idempotent
+        if (users.find(new Document("mail", email)).first() != null) {
+            return;
+        }
 
         try {
             String username = "exampleUser";
-            String email = "example@mail.com";
             String password = "mySecretPassword";
 
 
             TokenData tokenData = new TokenData(username, TokenEncrypter.encrypt(email), Instant.now().toString(), UUID.randomUUID().toString());
-            MongoCollection<Document> users = userDB.getCollection("users");
 
             // Hash password (SHA-256)
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -151,9 +155,5 @@ public class MongoRepo {
     public MongoCollection<Document> getUserCollection(final String collectionName) {
         return getUserDB().getCollection(collectionName);
     }
-    public MongoCollection<Document> getImagesCollection(final String collectionName) {
-        return getImageDB().getCollection(collectionName);
-    }
-
 }
 

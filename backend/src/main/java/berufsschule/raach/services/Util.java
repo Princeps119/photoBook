@@ -14,24 +14,39 @@ import com.mongodb.client.model.Filters;
 import com.sun.net.httpserver.HttpExchange;
 import org.bson.Document;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static berufsschule.raach.controllers.MainController.CONTENT_TYPE_JSON;
-import static berufsschule.raach.controllers.MainController.POST;
-
 public class Util {
 
     public static final Logger logger = Logger.getLogger(Util.class.getName());
+
+    public static final String POST = "POST";
+    public static final String GET = "GET";
+    public static final String DELETE = "DELETE";
+
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_TYPE_JSON = "application/json";
+    public static final String CHARSET = "charset=utf-8";
+    public static final String CONTENT_TYPE_JSON_AND_CHARSET = CONTENT_TYPE_JSON + ";" + CHARSET;
 
     public static String hashPassword(String password) {
         try {
@@ -52,9 +67,9 @@ public class Util {
         }
 
         // Validate Content-Type header
-        List<String> contentTypes = exchange.getRequestHeaders().get("Content-Type");
+        List<String> contentTypes = exchange.getRequestHeaders().get(CONTENT_TYPE);
         if (contentTypes == null || !contentTypes.contains(CONTENT_TYPE_JSON)) {
-            sendErrorResponse(exchange, 415, "Content-Type must be application/json");
+            sendErrorResponse(exchange, 415, CONTENT_TYPE + " must be " + CONTENT_TYPE_JSON);
             return false;
         }
 
@@ -87,10 +102,10 @@ public class Util {
             // Set proper headers, including CORS so browsers accept the response, see Main, do not need to set them again here
             // or new cors as the original header will not be removed
             var headers = exchange.getResponseHeaders();
-            if (headers.containsKey("Content-Type")) {
-                headers.get("Content-Type").remove(CONTENT_TYPE_JSON);
+            if (headers.containsKey(CONTENT_TYPE)) {
+                headers.get(CONTENT_TYPE).remove(CONTENT_TYPE_JSON);
             }
-            headers.set("Content-Type", "application/problem+json");
+            headers.set(CONTENT_TYPE, "application/problem+json");
             exchange.sendResponseHeaders(statusCode, responseBytes.length);
 
             // Use try-with-resources to prevent leaks
@@ -103,6 +118,9 @@ public class Util {
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Failed to send error response", e);
+        }
+        finally {
+            exchange.close();
         }
     }
 
@@ -189,12 +207,10 @@ public class Util {
         if (slashCount >= 3 && path.contains("image")) {
             return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
         } else {
-            logger.log(Level.SEVERE, "Issue pathing", path);
+            logger.log(Level.SEVERE, "Issue pathing: {0}", path);
             sendErrorResponse(exchange, 400, "Invalid JSON format");
+            return null;
         }
-        logger.log(Level.SEVERE, "Issue pathing", path);
-        sendErrorResponse(exchange, 400, "Invalid JSON format");
-        return null;
     }
 
     public static String checkPath(final String path, final HttpExchange exchange) {
@@ -210,12 +226,10 @@ public class Util {
         } else if (slashCount == 1) {
             return path;
         } else {
-            logger.log(Level.SEVERE, "Issue pathing", path);
+            logger.log(Level.SEVERE, "Issue pathing: {0}", path);
             sendErrorResponse(exchange, 400, "Invalid JSON format");
+            return null;
         }
-        logger.log(Level.SEVERE, "Issue pathing", path);
-        sendErrorResponse(exchange, 400, "Invalid JSON format");
-        return null;
     }
 
     public static JsonReader createJsonReader(HttpExchange exchange) {

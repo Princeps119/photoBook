@@ -24,15 +24,20 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static berufsschule.raach.controllers.MainController.*;
 import static berufsschule.raach.services.Util.*;
 
+/**
+ * The user controller class.
+ * Handles all incoming requests for user-related operations.
+ * User login, logout, registration, and deletion.
+ */
 public class UserController {
 
     public static final Logger logger = Logger.getLogger(UserController.class.getName());
+    private static final String API_PREFIX = "/api/";
 
-    private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList("/api/login", "/api/checkBackend",
-            "/api/register", "/api/delete", "/api/logout"));
+    private static final ArrayList<String> mapping = new ArrayList<>(Arrays.asList(API_PREFIX + "login", API_PREFIX + "checkBackend",
+            API_PREFIX + "register", API_PREFIX + "delete", API_PREFIX + "logout"));
 
     static Optional<Boolean> checkMapping(final String path, final String method, final HttpExchange exchange) throws IllegalArgumentException, IOException {
 
@@ -65,7 +70,6 @@ public class UserController {
                 final boolean result = loginService.logout(loginToken);
                 if (result) {
                     exchange.sendResponseHeaders(200, -1);
-                    exchange.close();
                     return true;
                 } else {
                     sendErrorResponse(exchange, 500, "Error processing logout request");
@@ -74,6 +78,8 @@ public class UserController {
         } catch (EncryptionException | IOException e) {
             logger.log(Level.WARNING, "Error processing logout request", e);
             sendErrorResponse(exchange, 500, "Error processing logout request");
+        } finally {
+            exchange.close();
         }
 
         return false;
@@ -86,18 +92,19 @@ public class UserController {
                 final DeletionService deletionService = DeletionService.getInstance();
                 final boolean didDelete = deletionService.deleteUser(exchange);
                 exchange.sendResponseHeaders(204, -1);
-                exchange.close();
                 return didDelete;
             } catch (IOException e) {
                 sendErrorResponse(exchange, 500, "Error deleting user");
 
+            } finally {
+                exchange.close();
             }
         }
         return false;
     }
 
     private static Boolean register(final String method, final HttpExchange exchange) throws IllegalArgumentException {
-        if (method.equals(POST) && exchange.getRequestHeaders().get("Content-Type").contains(CONTENT_TYPE_JSON)) {
+        if (method.equals(POST) && exchange.getRequestHeaders().get(CONTENT_TYPE).contains(CONTENT_TYPE_JSON)) {
             if (exchange.getRequestBody() != null) {
                 try {
                     final RegisterData registerData = readJSON(exchange, RegisterData.class);
@@ -105,7 +112,6 @@ public class UserController {
 
                     if (registrationService.register(registerData)) {
                         exchange.sendResponseHeaders(204, -1);
-                        exchange.close();
                         return true;
                     }
 
@@ -120,6 +126,8 @@ public class UserController {
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Exception", e);
                     sendErrorResponse(exchange, 500, "Internal server error");
+                } finally {
+                    exchange.close();
                 }
             } else {
                 sendErrorResponse(exchange, 400, "Request body is required");
@@ -161,7 +169,7 @@ public class UserController {
             // Success - send token
             final byte[] responseBytes = Util.createByteArray(token);
 
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.getResponseHeaders().set(CONTENT_TYPE, "application/json");
             exchange.sendResponseHeaders(200, responseBytes.length);
 
             try (OutputStream os = exchange.getResponseBody()) {

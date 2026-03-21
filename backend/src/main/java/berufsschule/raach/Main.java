@@ -11,6 +11,9 @@ import java.util.logging.Logger;
 
 import static berufsschule.raach.services.Util.sendErrorResponse;
 
+/**
+ *
+ */
 public class Main {
 
     public static final Logger logger = Logger.getLogger(Main.class.getName());
@@ -37,6 +40,7 @@ public class Main {
             }
 
             try {
+                logger.log(Level.INFO, "Request received: " + exchange.getRequestURI());
                 final Optional<Boolean> processedRequest = MainController.processRequest(exchange);
                 if (processedRequest.isPresent() && processedRequest.get()) {
                     logger.log(Level.INFO, "Request processed");

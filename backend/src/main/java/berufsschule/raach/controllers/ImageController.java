@@ -23,18 +23,12 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static berufsschule.raach.controllers.MainController.CONTENT_TYPE;
-import static berufsschule.raach.controllers.MainController.CONTENT_TYPE_JSON;
-import static berufsschule.raach.controllers.MainController.DELETE;
-import static berufsschule.raach.controllers.MainController.GET;
-import static berufsschule.raach.controllers.MainController.POST;
-import static berufsschule.raach.services.Util.checkLoginToken;
-import static berufsschule.raach.services.Util.checkPathImage;
-import static berufsschule.raach.services.Util.createByteArray;
-import static berufsschule.raach.services.Util.getQueryToMap;
-import static berufsschule.raach.services.Util.readJSON;
-import static berufsschule.raach.services.Util.sendErrorResponse;
+import static berufsschule.raach.services.Util.*;
 
+/**
+ *  Controller to handle image requests.
+ *  Can find, save, delete, and list images.
+ */
 public class ImageController {
 
     public static final Logger logger = Logger.getLogger(ImageController.class.getName());
@@ -154,6 +148,9 @@ public class ImageController {
             } catch (IllegalArgumentException e) {
                 sendErrorResponse(exchange, 400, "Invalid username or password");
             }
+            finally {
+                exchange.close();
+            }
         }
         return false;
     }
@@ -210,6 +207,7 @@ public class ImageController {
                         handleFoundImage(exchange, foundImageOpt.get());
                         return true;
                     }
+                    exchange.close();
                 }
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
@@ -240,6 +238,7 @@ public class ImageController {
                     handleFoundImage(exchange, foundImageOpt.get());
                     return true;
                 }
+                exchange.close();
             } catch (DbSearchException e) {
                 sendErrorResponse(exchange, 500, "Image not found");
             } catch (IllegalArgumentException e) {
@@ -274,6 +273,9 @@ public class ImageController {
                 return didDelete;
             } catch (IOException e) {
                 sendErrorResponse(exchange, 500, "Error deleting user");
+            }
+            finally {
+                exchange.close();
             }
         }
         return false;

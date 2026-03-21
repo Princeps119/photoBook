@@ -1,0 +1,102 @@
+@startuml
+title BFK_J3_Snake – Backend (Gesamtübersicht)
+
+package "root" {
+  class Main
+}
+
+package "controllers" {
+  class MainController
+  class FrontendController
+}
+
+package "services" {
+  class LoginService <<singleton>>
+  class RegistrationService <<singleton>>
+  class SaveGameService <<singleton>>
+  class Util
+  class TokenEncrypter
+  class DeletionService <<singleton>>
+}
+
+package "repository" {
+  class MongoRepo <<singleton>>
+}
+
+package "data" {
+  class LoginData <<record>>
+  class RegisterData <<record>>
+  class TokenData <<record>>
+  class GameSave <<record>>
+  class Highscore <<record>>
+  class Position <<record>>
+  class SnakePositionData <<record>>
+}
+
+package "exceptions" {
+  class UserNotFoundException
+  class EncryptionException
+}
+
+package "external" {
+  class HttpServer <<external>>
+  class HttpExchange <<external>>
+  class Gson <<external>>
+  class JsonReader <<external>>
+  class MongoCollection <<external>>
+  class MongoDatabase <<external>>
+  class Document <<external>>
+  class Filters <<external>>
+  class Logger <<external>>
+}
+
+/* Beziehungen */
+Main ..> controllers.MainController : processRequest(...)
+Main ..> controllers.FrontendController : serveStaticFromRoot(...)
+Main ..> services.Util : sendErrorResponse(...)
+
+controllers.MainController ..> services.LoginService
+controllers.MainController ..> services.RegistrationService
+controllers.MainController ..> services.DeletionService
+controllers.MainController ..> services.SaveGameService
+controllers.MainController ..> data.LoginData
+controllers.MainController ..> data.RegisterData
+controllers.MainController ..> data.TokenData
+controllers.MainController ..> data.SnakePositionData
+controllers.MainController ..> Gson
+controllers.MainController ..> JsonReader
+controllers.MainController ..> HttpExchange
+
+controllers.FrontendController ..> services.Util : sendErrorResponse(...)
+controllers.FrontendController ..> HttpExchange
+
+services.LoginService ..> repository.MongoRepo
+services.LoginService o--> MongoCollection
+services.LoginService ..> Document
+services.LoginService ..> Filters
+services.LoginService ..> services.Util
+services.LoginService ..> services.TokenEncrypter
+services.LoginService ..> data.TokenData
+services.LoginService ..> exceptions.UserNotFoundException
+
+services.RegistrationService ..> repository.MongoRepo
+services.RegistrationService o--> MongoCollection
+services.RegistrationService ..> Document
+services.RegistrationService ..> Filters
+services.RegistrationService ..> services.Util
+services.RegistrationService ..> data.RegisterData
+
+services.SaveGameService ..> repository.MongoRepo
+services.SaveGameService o--> MongoCollection
+services.SaveGameService ..> Document
+services.SaveGameService ..> services.Util : checkLoginToken(...)
+services.SaveGameService ..> data.SnakePositionData
+services.SaveGameService ..> exceptions.UserNotFoundException
+
+services.Util ..> HttpExchange
+services.TokenEncrypter ..> Key <<external>>
+
+repository.MongoRepo ..> MongoDatabase
+repository.MongoRepo ..> MongoCollection
+repository.MongoRepo ..> Document
+@enduml

@@ -1,3 +1,10 @@
 package berufsschule.raach.data;
 
-public record LoginData(String mail, String password) {}
+
+/**
+ * @param mail
+ * @param password
+ */
+public record LoginData(String mail, String password) {
+
+}
