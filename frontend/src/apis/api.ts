@@ -7,7 +7,6 @@ interface RequestOptions {
 }
 
 async function request(endpoint: string, options: RequestOptions = {}): Promise<any> {
-  console.log("API.ts")
   const url = `${endpoint}`;
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -18,7 +17,6 @@ async function request(endpoint: string, options: RequestOptions = {}): Promise<
     headers: { ...defaultHeaders, ...options.headers },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
-  console.log(response)
 
   if (!response.ok) {
     throw new Error(`API Error: ${response.status} ${response.statusText}`);

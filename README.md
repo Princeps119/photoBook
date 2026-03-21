@@ -115,5 +115,35 @@ Die MongoDB-Verbindungs-URI wird entweder über ein Docker-Secret (`/run/secrets
 
 ## Frontend (Maximilian Wagner)
 
+### Techstack
+Als Framework für das Frontend wurde Svelte und Sveltekit verwendet.
+
+Dieses funktioniert mit HTML, CSS und Typescript.
+
+### Start
+
+Um das Frontend zu starten:
+
+cd frontend
+
+pnpm install oder npm install jenachdem welcher Package Manager installiert ist.
+
+pnpm run dev oder npm run dev
+
+Frontend läuft dann unter localhost:5173
+
+### Svelte Backend
+
+Svelte besitzt mit Sveltekit ein eigenes Backend und ist somit ein Fullstack Framework.
+
+Hierbei wird Sveltekit verwendet, um die Logik für das verarbeiten des Auth Tokens, sowie um eigene API Routen zu definieren, welche mit dem Java Backend kommunizieren und für das Svelte Frontend zur Verfügung stehen.
+Somit ist eine Verarbeitung der Daten möglich ohne dass vertrauliche Daten in das Frontend gelangen.
+
+Als eigene API Routen wurden definiert:
+
+- api/auth -> login, register und logout.
+- api/photos -> delete, load.
+- api/upload.
+
 
 

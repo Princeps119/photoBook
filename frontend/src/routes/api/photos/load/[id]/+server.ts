@@ -8,23 +8,16 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
     const token = locals.token;
     const isPublic = url.searchParams.get('tag') === 'Public';
     const isPublicPhotos = url.searchParams.get('type') === 'Public';
-
-    const userPhotosUrl = `${BASE_URL}/api/image/findid?id=${id}&tag=${isPublic ? 'Public' : 'Private'}`;
+    
+    const backendUrl = isPublicPhotos ? `${BASE_URL}/api/image/getpublicimage?id=${id}&tag=Public` 
+    : `${BASE_URL}/api/image/findid?id=${id}&tag=${isPublic ? 'Public' : 'Private'}`;
     
     if (!token && !isPublicPhotos) {
         return json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    
-
-    
-
-    console.log(`GET request for photo ID: ${id}`);
-    console.log(`Using token: ${JSON.stringify(locals.token)}`);
-
     try {
-        const url = userPhotosUrl;
-        console.log(`Fetching from URL: ${url}`);
+        const url = backendUrl;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -32,9 +25,7 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
     },
         });
 
-        // console.log(`API Response Status: ${response.status} ${response.statusText}`);
         const responseText = await response.text();
-        console.log(`API Response Text (first 500 chars): ${responseText.substring(0, 500)}`);
 
         if (!response.ok) {
             console.error(`API Error Response: ${responseText}`);
@@ -42,8 +33,7 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
         }
 
         const data = JSON.parse(responseText);
-        console.log('API Data received:', JSON.stringify(data).substring(0, 100) + '...');
-        const base64String = data.base64 || data.body || (data.image ? data.image.base64 : null) || data;
+        const base64String = data.base64.base64;
         
         if (!base64String) {
             console.error('No base64 data found in API response');
@@ -53,7 +43,6 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
         const buffer = Buffer.from(base64String, 'base64');
         const contentType = data.metadata?.contentType || 'image/png';
 
-        console.log(`Returning image with content type: ${contentType} and size: ${buffer.length} bytes`);
         return new Response(buffer, {
             headers: {
                 'Content-Type': contentType,

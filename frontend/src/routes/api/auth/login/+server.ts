@@ -12,42 +12,30 @@ interface TokenData {
   version: string;
 }
 
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  token?: TokenData;
-}
-
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   try {
-    // Parse the incoming request body
     const body: LoginRequest = await request.json();
-
-    console.log('Login Request Body:', body);
-    // Validate required fields
     if (!body.mail || !body.password) {
-      return json(
+      return new Response(
+        JSON.stringify({ success: false, message: 'Email and password are required' }),
         {
-          success: false,
-          message: 'Email and password are required',
-        },
-        { status: 400 }
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(body.mail)) {
-      return json(
+      return new Response(
+        JSON.stringify({ success: false, message: 'Invalid email format' }),
         {
-          success: false,
-          message: 'Invalid email format',
-        },
-        { status: 400 }
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
-    // Forward the request to the backend API
     const response = await fetch('http://localhost:8080/api/login', {
       method: 'POST',
       headers: {
@@ -61,12 +49,15 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      return json(
-        {
+      return new Response(
+        JSON.stringify({
           success: false,
           message: errorData.message || 'Login failed. Please check your credentials.',
-        },
-        { status: response.status }
+        }),
+        {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
@@ -76,33 +67,29 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       username = responseData.username;
     }
 
-    // Store the token in cookies and locals
     cookies.set('token', JSON.stringify(responseData), {
     httpOnly: true,
     secure: true,
     sameSite: 'strict',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 Tage
-    // maxAge: 10, // 10 Sekunden für Testzwecke
+    maxAge: 60 * 60 * 4, // 4 Stunden wegen Backend
   });
-    console.log('Login successful, token stored in locals:', responseData);
-    console.log("Locals.token : ", locals.token);
 
-    return json(
-      {
+    return new Response(
+      JSON.stringify({
         success: true,
         message: 'Login successful',
         username: username,
-      },
+      }),
       { status: 200 }
     );
   } catch (error) {
     console.error('Login error:', error);
-    return json(
-      {
+    return new Response(
+      JSON.stringify({
         success: false,
         message: 'An error occurred during login. Please try again.',
-      },
+      }),
       { status: 500 }
     );
   }

@@ -27,24 +27,10 @@
 		}, 300);
 	}
 
-	/* 	async function handleClick() {
-		try {
-			const photoidresponse = await fetch('http://localhost:8080/api/image/allforuser', {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-			console.log('Manual fetch status:', photoidresponse.status);
-		} catch (error) {
-			console.error('Error fetching photo:', error);
-		}
-	} */
-
 let photoUrl = $state('');
 let isModalOpen = $state(false);
 function openPhotoModal(photo: PhotoData) {
-    photoUrl = `/api/photos/load/${photo.hexStringId}?tag=${photo.metadata.tag}`;
+    photoUrl = `/api/photos/load/${photo.hexStringId}?tag=Public&type=Public`;
     isModalOpen = true;
 }
 </script>
@@ -54,7 +40,6 @@ function openPhotoModal(photo: PhotoData) {
 	<div class="header">
 		<h1>Öffentliche Bilder</h1>
 		<h1>{photos.length} {photos.length === 1 ? 'Bild' : 'Bilder'}</h1>
-		<!-- <button class="fetch-btn" onclick={handleClick}>Fetch Photo Data</button> -->
 	</div>
 
 	<div class="content">
@@ -62,8 +47,7 @@ function openPhotoModal(photo: PhotoData) {
 			<LoadingSpinner />
 		{:else if paginatedPhotos.length === 0}
 			<div class="no-content">
-				<p>Keine Bilder gefunden.</p>
-				<p>Füge Bilder hinzu, indem du auf <a id="uploadlink" href="/upload">"Hochladen"</a> klickst.</p>
+				<p>Keine öffentlichen Bilder gefunden.</p>
 			</div>
 		{:else}
 			<div class="grid" class:loading={isLoading}>
@@ -126,10 +110,5 @@ function openPhotoModal(photo: PhotoData) {
 		text-align: center;
 		color: white;
 		font-size: 1.2rem;
-	}
-
-	#uploadlink {
-		color: #F59E0B;
-		font-weight: 600;
 	}
 </style>

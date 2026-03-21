@@ -11,11 +11,10 @@
 
 	let title = $derived('');
 	if (pagename === '/') {
-		title = 'Galery';
+		title = 'Home';
 	} else {
 		title = pagename.slice(1).charAt(0).toUpperCase() + pagename.slice(2);
 	}
-	console.log(title)
 
 	function logout() {
 		fetch('/api/auth/logout', {

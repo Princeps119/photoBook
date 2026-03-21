@@ -2,8 +2,6 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	try {
-		// Clear the authentication cookie
-
 		const response = await fetch('http://localhost:8080/api/logout', {
 			method: 'POST',
 			headers: {

@@ -41,16 +41,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       }
     };
 
-    console.log('FILE:', title);
-    console.log("locals:", locals);
-    // console.log('BODY:', JSON.stringify(body));
-    console.log('TOKEN:', locals.token);
-
-  //   return new Response(
-  //   JSON.stringify({ message: 'test' }),
-  //   { status: 200, headers: { 'Content-Type': 'application/json' } }
-  // );
-
     const response = await fetch(`${BASE_URL}/api/image/save`, {
       method: 'POST',
       headers: {
@@ -60,12 +50,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       body: JSON.stringify(body),
     });
 
-    console.log('API Token for Response Header:', JSON.stringify(locals.token));
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
-    console.log('API Response Status:', response.status);
     const result = response;
     if (response.ok) {
       return new Response(JSON.stringify(result), {
@@ -89,14 +77,4 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-  // } catch (error) {
-  //   console.error('Upload-Fehler:', error);
-  //   return new Response(
-  //     JSON.stringify({
-  //       error: error instanceof Error ? error.message : 'Upload fehlgeschlagen',
-  //     }),
-  //     { status: 200, headers: { 'Content-Type': 'application/json' } }
-  //   );
-  // }
-  
 };

@@ -1,9 +1,5 @@
-
-
-
 <script lang="ts">
 	import { goto } from "$app/navigation";
-
     let username = '';
     let email = '';
     let password = '';
@@ -42,9 +38,7 @@
             const data = await response.json();
             
             if (response.ok) {
-                console.log('Registration successful:', data);
                 goto('/login');
-                // Optionally, you can redirect to the login page or home page here
             } else {
                 error = data.message || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.';
                 console.error('Registration failed:', data);

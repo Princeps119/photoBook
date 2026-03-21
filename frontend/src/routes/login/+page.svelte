@@ -14,9 +14,6 @@
 
         try {
             const response = await api.Auth.login(email, password);
-
-            console.log('Login Response:', response);
-
             if (response.success === true) {
                 if (response.username) {
                     localStorage.setItem('username', response.username);
