@@ -4,15 +4,15 @@ Ein Fullstack-Webprojekt zum Hochladen, Verwalten und Teilen von Bildern.
 
 ## Projektübersicht
 
-Dieses Projekt besteht aus einem Java-Backend und einem modernen Frontend. Es ermöglicht Benutzern, sich zu registrieren, Bilder hochzuladen, diese als "Public" oder "Private" zu markieren und öffentliche Bilder anderer Benutzer anzusehen.
+Dieses Projekt besteht aus einem Java-Backend und einem modernen Svelte Frontend. Es ermöglicht Benutzern, sich zu registrieren, Bilder hochzuladen, diese als "Public" oder "Private" zu markieren und öffentliche Bilder anderer Benutzer anzusehen.
 
 ### Architektur & Technologien
 
-*   **Backend:** Java 17+, Maven, `com.sun.net.httpserver` (leichtgewichtiger HTTP-Server), MongoDB.
-*   **Frontend:** Dokumentation durch Maximilian Wagner (siehe `frontend` Verzeichnis).
-*   **Datenbank:** MongoDB (NoSQL) zur Speicherung von Benutzerdaten und Bild-Metadaten inkl. Base64-kodierter Bilder.
-*   **Infrastruktur:** Docker & Docker-Compose für Containerisierung.
-*   **Sicherheit:** Passwort-Hashing (SHA-256), Token-basierte Authentifizierung (Bearer Token) mit verschlüsselten Inhalten (AES).
+*   **Backend:** Java 17+, Maven, `com.sun.net.httpserver` (leichtgewichtiger HTTP-Server), MongoDB. (Robin)
+*   **Frontend:** Dokumentation und Entwicklung durch Maximilian Wagner (siehe `frontend` Verzeichnis).
+*   **Datenbank:** MongoDB (NoSQL) zur Speicherung von Benutzerdaten und Bild-Metadaten inkl. Base64-kodierter Bilder. (Robin)
+*   **Infrastruktur:** Docker & Docker-Compose für Containerisierung. (Robin)
+*   **Sicherheit:** Passwort-Hashing (SHA-256), Token-basierte Authentifizierung (Bearer Token) mit verschlüsselten Inhalten (AES). (Robin)
 
 ## Backend (Robin Mössinger)
 
@@ -67,10 +67,10 @@ Alle Endpunkte beginnen mit `/api/`.
     *   Prüft die Erreichbarkeit des Backends.
 
 #### Imagemanagement
-Alle bildbezogenen Endpunkte erfordern Authentifizierung (außer `allpublic`) und beginnen mit `/api/image/`.
+Alle bildbezogenen Endpunkte erfordern Authentifizierung über den LoginToken (außer `allpublic` und `getpublicimage`) und beginnen mit `/api/image/`.
 
 *   **Bild speichern** (`POST /api/image/save`)
-    *   Lädt ein neues Bild hoch.
+    *   User lädt ein neues Bild hoch.
     *   **Payload:** `ImageUploadData` (filename, metadata, base64 image). Der `tag` im `metadata`-Objekt bestimmt die Sichtbarkeit des Bildes (`Public` oder `Private`).
     *   **Beispiel Payload:**
         ```json
@@ -87,9 +87,9 @@ Alle bildbezogenen Endpunkte erfordern Authentifizierung (außer `allpublic`) un
 *   **Bild mit ID finden** (`GET /api/image/findid?id={id}&tag={Public|Private}`)
     *   Ruft ein Bild anhand seiner ID und Sichtbarkeit ab.
 *   **Eigene Bilder abrufen** (`GET /api/image/allforuser`)
-    *   Gibt eine Liste aller Bilder des authentifizierten Benutzers zurück.
+    *   Gibt eine Liste aller IDs der Bilder des authentifizierten Benutzers zurück.
 *   **Öffentliche Bilder abrufen** (`GET /api/image/allpublic`)
-    *   Gibt alle als "Public" markierten Bilder zurück (keine Auth erforderlich).
+    *   Gibt eine Liste der IDs aller als "Public" markierten zurück (keine Auth erforderlich).
 *   **Öffentliches Bild abrufen** (`GET /api/image/getpublicimage?id={id}&tag=Public`)
     *   Ruft ein öffentliches Bild anhand seiner ID ab (keine Auth erforderlich).
 *   **Bild löschen** (`DELETE /api/image/delete/{id}`)
@@ -101,19 +101,19 @@ Das Projekt wird über Docker-Compose im Verzeichnis `docker` verwaltet.
 1.  `photoBook_db`: MongoDB Container.
 2.  `photoBook_backend`: Java Backend Container (Port 8080).
 
-Zum Starten:
+Zum Starten vom Root verzeichnis aus:
 ```bash
 cd docker
 docker-compose -p photobook -f docker/docker-compose.yml up --build -d
 ```
 
 ### Entwicklung & Build
-Das Backend kann mit Maven gebaut werden:
+Das Backend kann mit Maven gebaut werden, dies ist aber bereits ein Schritt im Docker-Compose file:
 ```bash
 cd backend
 mvn clean install
 ```
-Die MongoDB-Verbindungs-URI wird entweder über ein Docker-Secret (`/run/secrets/MONGO_URI_FILE`) oder eine lokale Datei `backend/src/main/resources/uri.txt` konfiguriert.
+Die MongoDB-Verbindungs-URI wurde über ein Docker-Secret (`/run/secrets/MONGO_URI_FILE`) konfiguriert.
 
 ## Frontend (Maximilian Wagner)
 
